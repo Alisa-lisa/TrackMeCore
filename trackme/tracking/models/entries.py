@@ -1,6 +1,6 @@
 """ central model for data collection """
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 from datetime import datetime
 
 from trackme.storage import Base
