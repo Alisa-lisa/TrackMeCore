@@ -17,3 +17,7 @@ db-up:
 db-down:
 	poetry run alembic downgrade -1
 
+.PHONY: local-run
+local-run:
+	poetry run hypercorn -b 0.0.0.0:5000 -w 1 app:app 	
+

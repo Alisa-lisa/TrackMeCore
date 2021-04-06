@@ -11,5 +11,5 @@ conf = Configuration()
 
 Base = declarative_base()
 engine = create_async_engine(conf.DB_URI)
-async_session = AsyncSession(engine, expire_on_commit=False)
+async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
