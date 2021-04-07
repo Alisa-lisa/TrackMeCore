@@ -8,7 +8,7 @@ from trackme.tracking.types import (
 from trackme.tracking.crud import (
         create_user, 
         auth_user, 
-        update_user, 
+        update_user as edit_user, 
         delete_user,
 ) 
 from fastapi.logger import logger
@@ -38,7 +38,7 @@ async def login_user(input_user: UserInput):
 
 
 @router.put("/update", response_model=bool)
-async def update_user(input_user: UserInput, input_update: UserOptions, token: str = Header(None)):
+async def update_user(input_update: UserOptions, token: str = Header(None)):
     """
     Update some user information
     ---
@@ -49,7 +49,10 @@ async def update_user(input_user: UserInput, input_update: UserOptions, token: s
     ## Returns:
 
     """
-    return False
+    success, message = await edit_user(input_update, token)
+    if not success:
+        raise HTTPException(400, message)
+    return True
 
 
 @router.delete("/delete", response_model=bool)
