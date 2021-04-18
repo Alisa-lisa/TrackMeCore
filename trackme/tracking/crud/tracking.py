@@ -8,7 +8,8 @@ from trackme.tracking.types import (
         # UserInput,
 )
 from sqlalchemy.sql import select 
-from trackme.tracking.models import AttributeModel, TopicModel
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from trackme.tracking.models import AttributeModel, TopicModel, EntryModel
 from trackme.storage import async_session
 from fastapi.logger import logger 
 
@@ -37,7 +38,18 @@ async def get_attributes(user_id: Optional[int], topic_id: int) -> List[Attribut
             return []
 
 
-async def simple_track():
-    pass
+async def _prepare_attributes(db: AsyncSession, attributes: List[Attribute]) -> List[AttributeModel]:
+    return (await db.execute(select(AttributeModel).filter(AttributeModel.id.in_([a.id for a in attributes])))).scalars().all()
 
 
+async def simple_track(topic_id: int, comment: Optional[str], estimation: int, attributes: List[Attribute], user_id: int) -> bool:
+    async with async_session() as db:
+        try:
+            collected_attributes = await _prepare_attributes(db, attributes)
+            print(f"user is {user_id}")
+            db.add(EntryModel(comment=comment, estimation=estimation, topic_id=topic_id, attributes=collected_attributes, user_id=user_id))
+            await db.commit()
+            return True
+        except Exception as ex:
+            logger.error(f"Couldn't save entry due to {ex}")
+            return False

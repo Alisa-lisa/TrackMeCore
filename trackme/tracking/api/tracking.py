@@ -2,7 +2,7 @@
 from typing import List, Optional
 from fastapi import APIRouter,HTTPException, Header
 from trackme.tracking.types import (
-        # TrackingActivityInput, 
+        TrackingActivityInput, 
         # TrackingActivityOutput,
         # TrackingActivityOption,
         Topic,
@@ -11,10 +11,9 @@ from trackme.tracking.types import (
 )
 from trackme.tracking.crud import (
         simple_track,
-        # get_user_by_token,
+        get_user_by_token,
         # get_topic_by_id, 
         # get_records_for_user,
-
         get_topics,
         get_attributes,
 )
@@ -56,7 +55,6 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
     return await get_attributes(user_id, topic_id)
 
 
-# @router.get("/raw")
 # async def get_raw_data(token: str = Header(None)):
 #     """ data dump for the user """
 #     if token is None:
@@ -87,18 +85,26 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
 #         return {"message": "no file can be created at this time."}
 #
 #
-# # WRITE
-# @router.post("/save", response_model=bool)
-# async def track(data_input: TrackingActivityInput, token: str = Header(None)):
-#     """ unified tracking endpoint - no predefined form """
-#     if token is None:
-#         raise HTTPException(401, "No access token provided")
-#     else:
-#         user_id = get_user_by_token(token)
-#         if user_id is None:
-#             logger.error(f"Could not detect user for token {token}")
-#             raise HTTPException(404, "Not a valid token")
-#         return simple_track(data_input, user_id)
+# WRITE
+@router.post("/save", response_model=bool)
+async def track(data_input: TrackingActivityInput, token: str = Header(None)):
+    """ 
+    Save tracking entry
+    ---
+    ## Parameters:
+    - data_input: TrackingActivityInput
+    - token for user identification
+    
+    ## Returns:
+    True if operation is successful, False otherwise
+    """
+    if token is None:
+        raise HTTPException(401, "No access token provided")
+    else:
+        user_id = await get_user_by_token(token)
+        if user_id is None:
+            raise HTTPException(404, "Not a valid token")
+        return await simple_track(data_input.topic_id, data_input.comment, data_input.estimation, data_input.attributes, user_id)
 #
 #
 # # UPDATE

@@ -21,6 +21,6 @@ class TrackingActivity(Base):
     estimation = Column(Integer, nullable=False)
     deleted_at = Column(DateTime, nullable=True)
 
-    topic_id = Column(Integer, ForeignKey("topics.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    topic_id = Column(Integer, ForeignKey("topics.id"), nullable=True)  # missing topic id is fast-track case
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     attributes = relationship("Attribute", uselist=True, secondary=attributes_of_entry, backref="tracking")

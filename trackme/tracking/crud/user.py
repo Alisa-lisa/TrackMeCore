@@ -46,7 +46,7 @@ async def auth_user(user: UserInput,
         if verify_user is not None:
             existing_token = (await db.execute(select(UserActivityModel)\
                     .filter(UserActivityModel.user_id == verify_user.user_id)\
-                    .filter(UserActivityModel.client == client))).first()
+                    .filter(UserActivityModel.client == client))).scalars().first()
             if existing_token is not None:
                 return str(existing_token.token), "success"
             else:
@@ -83,7 +83,14 @@ async def _get_user_id_by_token(db: AsyncSession, token: str) -> Optional[int]:
     .where(UserActivityModel.token == token))).first()
     if user_id is None:
         return None   
-    return user_id[0]
+    return user_id
+
+
+async def get_user_by_token(token: str) -> Optional[int]:
+    async with async_session() as db:
+        user_id = await _get_user_id_by_token(db, token)    
+        return user_id[0] if user_id is not None else None
+
 
 
 async def _is_valid_name(db: AsyncSession, new_name: str) -> bool:
