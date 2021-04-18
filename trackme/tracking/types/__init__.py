@@ -1,2 +1,2 @@
 from .user import UserInput, UserOutput, UserOptions, User, UserActivity
-# from .tracking import
+from .tracking import Topic, Attribute

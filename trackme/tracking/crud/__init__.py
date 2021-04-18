@@ -4,3 +4,9 @@ from .user import (
     update_user,
     delete_user,
 )
+
+from .tracking import (
+    get_topics,
+    get_attributes,
+    simple_track,
+)
