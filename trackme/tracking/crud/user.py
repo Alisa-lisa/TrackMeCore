@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 import uuid
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql import select 
-from trackme.tracking.types import (
+from trackme.tracking.types.user import (
         UserInput,
         UserOutput, 
 )

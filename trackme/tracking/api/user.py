@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Header 
-from trackme.tracking.types import (
+from trackme.tracking.types.user import (
         UserInput,
         UserOptions,
 )

@@ -1,24 +1,8 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional
+from pydantic import BaseModel, Field, EmailStr, validator
 from datetime import datetime
 
-
-class Topic(BaseModel):
-    class Config:
-        orm_mode = True
-    id: int
-    name: str
-   
-
-class Attribute(BaseModel):
-    class Config:
-        orm_mode = True
-
-    id: int
-    name: str
-    topic_id: int
-    user_id: Optional[int]
+from .data_type import Attribute
 
 
 class TrackingActivity(BaseModel):
@@ -41,3 +25,10 @@ class TrackingActivityInput(BaseModel):
     comment: Optional[str]
     estimation: int
     attributes: List[Attribute] = Field(default_factory=list, min_items=1)
+
+
+class UpdateTrackingActivity(BaseModel):
+    id: int
+    comment: Optional[str]
+    delete_attribuets: List[Attribute] = Field(default_factory=list)
+    add_attributes: List[Attribute] = Field(default_factory=list)

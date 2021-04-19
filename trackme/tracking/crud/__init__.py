@@ -10,4 +10,7 @@ from .tracking import (
     get_topics,
     get_attributes,
     simple_track,
+    edit_entry,
 )
+
+from .tracking_validation import does_entry_exist

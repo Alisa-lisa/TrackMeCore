@@ -1,21 +1,22 @@
 """ very simple tracking API """
 from typing import List, Optional
 from fastapi import APIRouter,HTTPException, Header
-from trackme.tracking.types import (
+from trackme.tracking.types.tracking import (
         TrackingActivityInput, 
-        # TrackingActivityOutput,
-        # TrackingActivityOption,
+        UpdateTrackingActivity,
+)
+from trackme.tracking.types.data_type import (
         Topic,
         Attribute,
-        UserInput,
 )
+from trackme.tracking.types.user import UserInput
 from trackme.tracking.crud import (
         simple_track,
         get_user_by_token,
-        # get_topic_by_id, 
-        # get_records_for_user,
+        edit_entry,
         get_topics,
         get_attributes,
+        does_entry_exist
 )
 import logging
 from fastapi.logger import logger
@@ -27,6 +28,11 @@ from typing import List
 
 router = APIRouter()
 logger.setLevel(logging.ERROR)
+
+# TODO: Error messages go into middleware validation
+NO_TOKEN = "No access token provided"
+NO_USER_TOKEN = "Invalid token"
+UNKNOWN_ID = "No entry with this id was found"
 
 
 # READ
@@ -99,31 +105,37 @@ async def track(data_input: TrackingActivityInput, token: str = Header(None)):
     True if operation is successful, False otherwise
     """
     if token is None:
-        raise HTTPException(401, "No access token provided")
-    else:
-        user_id = await get_user_by_token(token)
-        if user_id is None:
-            raise HTTPException(404, "Not a valid token")
-        return await simple_track(data_input.topic_id, data_input.comment, data_input.estimation, data_input.attributes, user_id)
-#
-#
-# # UPDATE
-# @router.put("/update", response_model=bool)
-# async def update_entry(data_input: TrackingActivityOption,user_input: UserInput, token: str = Header(None)):
-#     """
-#     Adjust specific entry
-#     ---
-#
-#     ## Parameters:
-#     * data_input - all fields of tracking Entry that should be updated must not be None
-#     * user_input - user name and password to confirm change
-#
-#     ## Returns:
-#     If successful True, otherwise False
-#     """
-#     return False
-#
-#
+        raise HTTPException(401, NO_TOKEN)
+    user_id = await get_user_by_token(token)
+    if user_id is None:
+        raise HTTPException(404, NO_USER_TOKEN)
+    return await simple_track(data_input.topic_id, data_input.comment, data_input.estimation, data_input.attributes, user_id)
+
+
+# UPDATE
+@router.put("/update", response_model=bool)
+async def update_entry(data_input: UpdateTrackingActivity, user_input: UserInput, token: str = Header(None)):
+    """
+    Adjust specific entry
+    ---
+
+    ## Parameters:
+    * data_input - all fields of tracking Entry that should be updated must not be None
+    * user_input - user name and password to confirm change
+
+    ## Returns:
+    True if successful, False otherwise
+    """
+    if token is None:
+        raise HTTPException(401, NO_TOKEN)
+    user_id = await get_user_by_token(token)
+    if user_id is None:
+        raise HTTPException(404, NO_USER_TOKEN)
+    if not (await does_entry_exist(data_input.id)):
+        raise HTTPException(400, UNKNOWN_ID)
+    return await edit_entry(user_id, data_input.id, data_input.comment, data_input.delete_attribuets, data_input.add_attributes)
+
+
 #
 # # DELETE
 # @router.delete("/delete", response_model=bool)

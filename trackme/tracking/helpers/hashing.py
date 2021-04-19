@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 from trackme.config import Configuration
-from trackme.tracking.types import UserInput, User
+from trackme.tracking.types.user import UserInput, User
 
 
 config = Configuration()
