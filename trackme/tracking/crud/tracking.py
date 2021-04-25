@@ -5,7 +5,7 @@ from trackme.tracking.types.data_type import (
 )
 from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from trackme.tracking.models import AttributeModel, TopicModel, EntryModel
+from trackme.tracking.models import AttributeModel, TopicModel, EntryModel, TAModel
 from trackme.storage import async_session
 from fastapi.logger import logger 
 
@@ -41,8 +41,11 @@ async def _prepare_attributes(db: AsyncSession, attributes: List[Attribute]) -> 
 async def simple_track(topic_id: int, comment: Optional[str], estimation: int, attributes: List[Attribute], user_id: int) -> bool:
     async with async_session() as db:
         try:
-            collected_attributes = await _prepare_attributes(db, attributes)
-            db.add(EntryModel(comment=comment, estimation=estimation, topic_id=topic_id, attributes=collected_attributes, user_id=user_id))
+            # TODO: validate attribute ids 
+            tracking_attributes = [TAModel(attribute_id=attribute.id) for attribute in attributes]
+            new_tracking = EntryModel(comment=comment, estimation=estimation, topic_id=topic_id, user_id=user_id)
+            new_tracking.tracking_attributes = tracking_attributes
+            db.add_all([new_tracking] + tracking_attributes)
             await db.commit()
             return True
         except Exception as ex:
@@ -54,6 +57,7 @@ async def _get_entry_by_id(db: AsyncSession, entry_id: int, user_id: int) -> Opt
     return (await db.execute(select(EntryModel).filter(EntryModel.id == entry_id).filter(EntryModel.user_id == user_id))).scalars().first()
 
 
+# TODO!
 async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
     async with async_session() as db:
         try:
@@ -79,6 +83,7 @@ async def delete_entry(entry_id: int, user_id: int) -> bool:
             if entry is None:
                 return False
             await db.execute(delete(EntryModel).where(EntryModel.id == entry_id, EntryModel.user_id == user_id))
+            await db.commit()
             return True
         except Exception as ex:
             logger.error(f"Could not delete entry due to {ex}")
