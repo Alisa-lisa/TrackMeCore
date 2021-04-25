@@ -8,7 +8,8 @@ from trackme.storage import Base
 
 attributes_of_entry = Table('attributes_2_entry', Base.metadata,
         Column('attribute_id', Integer, ForeignKey('attributes.id')),
-        Column('tracking_entry_id', Integer, ForeignKey('tracking.id')))
+        Column('tracking_entry_id', Integer, ForeignKey('tracking.id')),
+        )
 
 
 class TrackingActivity(Base):

@@ -19,7 +19,7 @@ class Topic(Base):
 class Attribute(Base):
     __tablename__ = "attributes"
 
-    id = Column(Integer, primary_key=True, auto_increment=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     topic_id = Column(Integer, ForeignKey('topics.id'))
     user_id = Column(Integer, ForeignKey('users.id'), nullable=True)

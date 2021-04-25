@@ -1,6 +1,7 @@
 """ very simple tracking API """
 from typing import List, Optional
-from fastapi import APIRouter,HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header
+from fastapi.responses import JSONResponse
 from trackme.tracking.types.tracking import (
         TrackingActivityInput, 
         UpdateTrackingActivity,
@@ -12,12 +13,14 @@ from trackme.tracking.types.data_type import (
 from trackme.tracking.types.user import UserInput
 from trackme.tracking.crud import (
         simple_track,
+        delete_entry,
         get_user_by_token,
         edit_entry,
         get_topics,
         get_attributes,
         does_entry_exist
 )
+# from trackme.tracking.utils import dowload_data
 import logging
 from fastapi.logger import logger
 from fastapi.responses import FileResponse
@@ -61,6 +64,12 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
     return await get_attributes(user_id, topic_id)
 
 
+@router.get("/data")
+async def download_data(token: str = Header(...)):
+    """
+    Collect user data in one file
+    """
+    return JSONResponse(success=False, error="Not implemented yet")
 # async def get_raw_data(token: str = Header(None)):
 #     """ data dump for the user """
 #     if token is None:
@@ -93,7 +102,7 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
 #
 # WRITE
 @router.post("/save", response_model=bool)
-async def track(data_input: TrackingActivityInput, token: str = Header(None)):
+async def track(data_input: TrackingActivityInput, token: str = Header(...)):
     """ 
     Save tracking entry
     ---
@@ -136,24 +145,29 @@ async def update_entry(data_input: UpdateTrackingActivity, user_input: UserInput
     return await edit_entry(user_id, data_input.id, data_input.comment, data_input.delete_attribuets, data_input.add_attributes)
 
 
-#
-# # DELETE
-# @router.delete("/delete", response_model=bool)
-# async def delete_one_entry(entry_id: int, token: str = Header(None)):
-#     """
-#     Delete one specific entry by id
-#     ---
-#
-#     ## Parameters:
-#     * entry_id - id of specific data record to delete
-#
-#     ## Returns:
-#     True if successful, False otherwise
-#
-#     """
-#     return False
-#
-#
+
+# DELETE
+@router.delete("/delete", response_model=bool)
+async def delete_one_entry(entry_id: int, token: str = Header(...)):
+    """
+    Delete one specific entry by id
+    ---
+
+    ## Parameters:
+    * entry_id - id of specific data record to delete
+
+    ## Returns:
+    True if successful, False otherwise
+
+    """
+    if token is None:
+        raise HTTPException(401, NO_TOKEN)
+    user_id = await get_user_by_token(token)
+    if user_id is None:
+        raise HTTPException(404, NO_USER_TOKEN)
+    return await delete_entry(entry_id, user_id)
+
+
 # @router.delete("/delete_all", response_model=bool)
 # async def delete_all_data(user_input: UserInput, token: str = Header(None)):
 #     """

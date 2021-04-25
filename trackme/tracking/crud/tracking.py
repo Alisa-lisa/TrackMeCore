@@ -3,7 +3,7 @@ from trackme.tracking.types.data_type import (
         Topic,
         Attribute,
 )
-from sqlalchemy.sql import select 
+from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from trackme.tracking.models import AttributeModel, TopicModel, EntryModel
 from trackme.storage import async_session
@@ -42,7 +42,6 @@ async def simple_track(topic_id: int, comment: Optional[str], estimation: int, a
     async with async_session() as db:
         try:
             collected_attributes = await _prepare_attributes(db, attributes)
-            print(f"user is {user_id}")
             db.add(EntryModel(comment=comment, estimation=estimation, topic_id=topic_id, attributes=collected_attributes, user_id=user_id))
             await db.commit()
             return True
@@ -51,15 +50,14 @@ async def simple_track(topic_id: int, comment: Optional[str], estimation: int, a
             return False
 
 
-async def _get_entry_by_id(db: AsyncSession, id: int) -> EntryModel:
-    return (await db.execute(select(EntryModel).filter(EntryModel.id == id))).scalars().first()
+async def _get_entry_by_id(db: AsyncSession, entry_id: int, user_id: int) -> Optional[EntryModel]:
+    return (await db.execute(select(EntryModel).filter(EntryModel.id == entry_id).filter(EntryModel.user_id == user_id))).scalars().first()
 
 
-async def edit_entry(user_id: int, id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
+async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
     async with async_session() as db:
         try:
-            entry = (await _get_entry_by_id(db, id))
-            print(f"this is entry {entry}") 
+            entry = (await _get_entry_by_id(db, entry_id, user_id))
             entry.comment = comment
 
             new_attributes_set = [a for a in entry.attributes if a.id not in delete_attribuets]
@@ -72,3 +70,17 @@ async def edit_entry(user_id: int, id: int, comment: Optional[str], delete_attri
         except Exception as ex:
             logger.error(f"Could not update entry due to {ex}")
             return False
+
+# TODO: where to put validation connected to DB?
+async def delete_entry(entry_id: int, user_id: int) -> bool:
+    async with async_session() as db:
+        try:
+            entry = (await _get_entry_by_id(db, entry_id, user_id))
+            if entry is None:
+                return False
+            await db.execute(delete(EntryModel).where(EntryModel.id == entry_id, EntryModel.user_id == user_id))
+            return True
+        except Exception as ex:
+            logger.error(f"Could not delete entry due to {ex}")
+            return False
+
