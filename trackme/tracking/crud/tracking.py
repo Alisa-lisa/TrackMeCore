@@ -1,11 +1,14 @@
+from trackme.tracking.models import entries
 from typing import Optional, List
 from trackme.tracking.types.data_type import (
         Topic,
         Attribute,
 )
+from sqlalchemy import desc
 from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from trackme.tracking.models import AttributeModel, TopicModel, EntryModel, TAModel
+from trackme.tracking.types.tracking import TrackingActivity
 from trackme.storage import async_session
 from fastapi.logger import logger 
 
@@ -88,4 +91,49 @@ async def delete_entry(entry_id: int, user_id: int) -> bool:
         except Exception as ex:
             logger.error(f"Could not delete entry due to {ex}")
             return False
+
+
+async def _get_topics_by_name(names: List[str]) -> List[int]:
+    async with async_session() as db:
+        return (await db.execute(select(TopicModel.id).where(TopicModel.name.in_(names)))).scalars().all()
+
+
+async def _get_attributes_by_name(names: List[str]) -> List[int]:
+    async with async_session() as db:
+        return (await db.execute(select(AttributeModel.id).where(AttributeModel.name.in_(names)))).scalars().all()
+ 
+
+async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optional[str], end: Optional[str], attributes: Optional[List[str]], comments: bool) -> List[TrackingActivity]:
+    async with async_session() as db:
+        try:
+            entries_query = select(EntryModel).filter(EntryModel.user_id == user_id)
+            if topics is not None:
+                if bool(topics):
+                    topics_ids = await _get_topics_by_name(topics)
+                    entries_query = entries_query.filter(EntryModel.topic_id.in_(topics_ids))
+            if start is not None:
+                entries_query = entries_query.filter(EntryModel.created_at >= start)
+            if end is not None:
+                entries_query = entries_query.filter(EntryModel.created_at <= end)
+            if comments:
+                entries_query = entries_query.filter(EntryModel.comment.isnot(None))
+            if attributes is not None:
+                if bool(attributes):
+                    attributes_ids = await _get_attributes_by_name(attributes)
+                    entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.attribute_id.in_(attributes_ids))
+            entries_query = entries_query.order_by(desc(EntryModel.created_at))
+            entries = (await db.execute(entries_query)).scalars().all()
+            print(f"these are entries {entries}")
+            entries = [TrackingActivity(id=entry.id, 
+                created_at=entry.created_at, 
+                edit_at=entry.edit_at,
+                comment=entry.comment,
+                estimation=entry.estimation,
+                topic_id=entry.topic_id,
+                user_id=entry.user_id,
+                attributes=[]) for entry in entries]
+            return entries
+        except Exception as ex:
+            logger.error(f"Could not collect entries due to {ex}")
+            return []
 

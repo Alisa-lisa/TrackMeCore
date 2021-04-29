@@ -12,6 +12,7 @@ from .tracking import (
     simple_track,
     edit_entry,
     delete_entry,
+    filter_entries,
 )
 
 from .tracking_validation import does_entry_exist

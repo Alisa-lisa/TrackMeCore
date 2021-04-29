@@ -3,8 +3,10 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Header
 from fastapi.responses import JSONResponse
 from trackme.tracking.types.tracking import (
-        TrackingActivityInput, 
+        TrackingActivityInput,
         UpdateTrackingActivity,
+        TrackingActivity,
+        FilterTrackingAttributes,
 )
 from trackme.tracking.types.data_type import (
         Topic,
@@ -18,7 +20,8 @@ from trackme.tracking.crud import (
         edit_entry,
         get_topics,
         get_attributes,
-        does_entry_exist
+        does_entry_exist,
+        filter_entries,
 )
 # from trackme.tracking.utils import dowload_data
 import logging
@@ -36,6 +39,17 @@ logger.setLevel(logging.ERROR)
 NO_TOKEN = "No access token provided"
 NO_USER_TOKEN = "Invalid token"
 UNKNOWN_ID = "No entry with this id was found"
+
+
+# TODO: ideally this should go into specific middleware or auth function
+async def check_user(token: str) -> int:
+    if token is None:
+        raise HTTPException(401, NO_TOKEN)
+    user_id = await get_user_by_token(token)
+    if user_id is None:
+        raise HTTPException(404, NO_USER_TOKEN)
+    return user_id
+
 
 
 # READ
@@ -64,7 +78,27 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
     return await get_attributes(user_id, topic_id)
 
 
-@router.get("/data")
+# this shoudl be get -> put filters into query params
+@router.post("/data", response_model=List[TrackingActivity])
+async def collect_filtered_entries(filter_conditions: FilterTrackingAttributes, token: str = Header(...)):
+    """
+    # Filter tracking entries 
+    ---
+    ## Parameters:
+    - starting timestamp
+    - ending timestamp
+    - topics: List[str]
+    - comment: bool
+    - attributes: List[str]
+
+    ## Returns:
+    List of tracking entries satisfying filter conditions, sorted by recency
+    """
+    user = await check_user(token)
+    return await filter_entries(user, filter_conditions.topics, filter_conditions.starting_time, filter_conditions.ending_time, filter_conditions.attributes, filter_conditions.comments)
+
+
+@router.get("/download")
 async def download_data(token: str = Header(...)):
     """
     Collect user data in one file

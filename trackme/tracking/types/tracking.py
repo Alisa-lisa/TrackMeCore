@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
 from .data_type import Attribute
@@ -14,10 +14,21 @@ class TrackingActivity(BaseModel):
     deleted_at: Optional[datetime]
     topic_id: int
     user_id: int
-    attributes: List[Attribute]
+    attributes: List[str]
 
-    class Config:
-        orm_mode = True
+
+class FilterTrackingAttributes(BaseModel):
+    starting_time: Optional[str] = None
+    ending_time: Optional[str]
+    topics: Optional[List[str]] = None
+    attributes: Optional[List[str]] = None
+    comments: bool = False
+
+    # TODO: proper validation
+    # @validator('*')
+    # def check_all_filters(cls, values):
+    #     print(values.get("starting_time"))
+    
 
 
 class TrackingActivityInput(BaseModel):
