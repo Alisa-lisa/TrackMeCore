@@ -157,7 +157,7 @@ async def track(data_input: TrackingActivityInput, token: str = Header(...)):
 
 # UPDATE
 @router.put("/update", response_model=bool)
-async def update_entry(data_input: UpdateTrackingActivity, user_input: UserInput, token: str = Header(None)):
+async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(None)):
     """
     Adjust specific entry
     ---

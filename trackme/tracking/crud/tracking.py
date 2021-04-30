@@ -1,3 +1,4 @@
+from datetime import datetime
 from trackme.tracking.models import entries
 from typing import Optional, List
 from trackme.tracking.types.data_type import (
@@ -57,7 +58,7 @@ async def simple_track(topic_id: int, comment: Optional[str], estimation: int, a
             return False
 
 
-async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int) -> Optional[EntryModel]:
+async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int) -> Optional[List[EntryModel]]:
     return (await db.execute(select(EntryModel).filter(EntryModel.id.in_(entry_ids)).filter(EntryModel.user_id == user_id))).scalars().all()
 
 
@@ -65,14 +66,19 @@ async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int)
 async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
     async with async_session() as db:
         try:
-            entry = (await _get_entry_by_id(db, [entry_id], user_id))[o]
+            entry = (await _get_entry_by_id(db, [entry_id], user_id))[0]
             entry.comment = comment
+            entry.edit_at = datetime.now()
+            
+            # updating entries happens on TAModel: create and delete
+            deleted_ta = (await db.execute(select(TAModel).filter(TAModel.attribute_id.in_(delete_attribuets)).filter(TAModel.tracking_id == entry_id).filter(TAModel.deleted_at.isnot(None)))).scalars().all()
+            print(f"deleted {deleted_ta}")
+            for ta in deleted_ta:
+                ta.deleted_at = datetime.now()
 
-            new_attributes_set = [a for a in entry.attributes if a.id not in delete_attribuets]
-            # TODO: create new attributes and add them to the event update
-            # new_attributes_set = new_attributes_set.extend([AttributeModel(name=a.name, topic_id=a.topic_id, user_id=user_id)])
-            entry.attributes = new_attributes_set
-
+            # creating new attributes for tracking entry
+            new_ta = [TAModel(attribute_id=a.id, tracking_id=entry_id) for a in add_attributes]
+            db.add_all(new_ta)
             await db.commit()
             return True
         except Exception as ex:
@@ -126,7 +132,7 @@ async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optio
             if attributes is not None:
                 if bool(attributes):
                     attributes_ids = await _get_attributes_by_name(attributes)
-                    entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.attribute_id.in_(attributes_ids))
+                    entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.deleted_at.isnot(None)).filter(TAModel.attribute_id.in_(attributes_ids))
             entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
             entries = [TrackingActivity(id=entry.id, 

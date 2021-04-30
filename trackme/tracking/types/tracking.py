@@ -41,5 +41,5 @@ class TrackingActivityInput(BaseModel):
 class UpdateTrackingActivity(BaseModel):
     id: int
     comment: Optional[str]
-    delete_attribuets: List[Attribute] = Field(default_factory=list)
+    delete_attribuets: List[int] = Field(default_factory=list)
     add_attributes: List[Attribute] = Field(default_factory=list)
