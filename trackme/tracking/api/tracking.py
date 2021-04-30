@@ -78,15 +78,15 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
     return await get_attributes(user_id, topic_id)
 
 
-# this shoudl be get -> put filters into query params
+# this should be get -> put filters into query params
 @router.post("/data", response_model=List[TrackingActivity])
 async def collect_filtered_entries(filter_conditions: FilterTrackingAttributes, token: str = Header(...)):
     """
     # Filter tracking entries 
     ---
     ## Parameters:
-    - starting timestamp
-    - ending timestamp
+    - starting time stamp
+    - ending time stamp
     - topics: List[str]
     - comment: bool
     - attributes: List[str]

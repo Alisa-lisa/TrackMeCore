@@ -9,6 +9,7 @@ from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from trackme.tracking.models import AttributeModel, TopicModel, EntryModel, TAModel
 from trackme.tracking.types.tracking import TrackingActivity
+from trackme.tracking.types.data_type import AttributeOutput
 from trackme.storage import async_session
 from fastapi.logger import logger 
 
@@ -101,7 +102,12 @@ async def _get_topics_by_name(names: List[str]) -> List[int]:
 async def _get_attributes_by_name(names: List[str]) -> List[int]:
     async with async_session() as db:
         return (await db.execute(select(AttributeModel.id).where(AttributeModel.name.in_(names)))).scalars().all()
- 
+
+
+async def _collect_attributes_for_entry(db: AsyncSession, entry_id: int) -> List[AttributeOutput]:
+    attributes = (await db.execute(select(AttributeModel).join(TAModel).filter(TAModel.tracking_id == entry_id).filter(AttributeModel.id == TAModel.attribute_id))).scalars().all()
+    return [AttributeOutput(name=a.name) for a in attributes]
+
 
 async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optional[str], end: Optional[str], attributes: Optional[List[str]], comments: bool) -> List[TrackingActivity]:
     async with async_session() as db:
@@ -131,7 +137,7 @@ async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optio
                 estimation=entry.estimation,
                 topic_id=entry.topic_id,
                 user_id=entry.user_id,
-                attributes=[]) for entry in entries]
+                attributes= await _collect_attributes_for_entry(db, entry.id)) for entry in entries]
             return entries
         except Exception as ex:
             logger.error(f"Could not collect entries due to {ex}")

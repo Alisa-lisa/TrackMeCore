@@ -2,7 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
-from .data_type import Attribute
+from .data_type import Attribute, AttributeOutput
 
 
 class TrackingActivity(BaseModel):
@@ -14,7 +14,7 @@ class TrackingActivity(BaseModel):
     deleted_at: Optional[datetime]
     topic_id: int
     user_id: int
-    attributes: List[str]
+    attributes: List[AttributeOutput]
 
 
 class FilterTrackingAttributes(BaseModel):
