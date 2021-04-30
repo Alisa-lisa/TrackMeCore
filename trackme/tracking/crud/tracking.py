@@ -57,15 +57,15 @@ async def simple_track(topic_id: int, comment: Optional[str], estimation: int, a
             return False
 
 
-async def _get_entry_by_id(db: AsyncSession, entry_id: int, user_id: int) -> Optional[EntryModel]:
-    return (await db.execute(select(EntryModel).filter(EntryModel.id == entry_id).filter(EntryModel.user_id == user_id))).scalars().first()
+async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int) -> Optional[EntryModel]:
+    return (await db.execute(select(EntryModel).filter(EntryModel.id.in_(entry_ids)).filter(EntryModel.user_id == user_id))).scalars().all()
 
 
 # TODO!
 async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
     async with async_session() as db:
         try:
-            entry = (await _get_entry_by_id(db, entry_id, user_id))
+            entry = (await _get_entry_by_id(db, [entry_id], user_id))[o]
             entry.comment = comment
 
             new_attributes_set = [a for a in entry.attributes if a.id not in delete_attribuets]
@@ -80,13 +80,13 @@ async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete
             return False
 
 # TODO: where to put validation connected to DB?
-async def delete_entry(entry_id: int, user_id: int) -> bool:
+async def delete_entry(entry_ids: List[int], user_id: int) -> bool:
     async with async_session() as db:
         try:
-            entry = (await _get_entry_by_id(db, entry_id, user_id))
-            if entry is None:
+            entries = (await _get_entry_by_id(db, entry_ids, user_id))
+            if entries is None:
                 return False
-            await db.execute(delete(EntryModel).where(EntryModel.id == entry_id, EntryModel.user_id == user_id))
+            await db.execute(delete(EntryModel).where(EntryModel.id.in_(entry_ids), EntryModel.user_id == user_id))
             await db.commit()
             return True
         except Exception as ex:
@@ -129,7 +129,6 @@ async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optio
                     entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.attribute_id.in_(attributes_ids))
             entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
-            print(f"these are entries {entries}")
             entries = [TrackingActivity(id=entry.id, 
                 created_at=entry.created_at, 
                 edit_at=entry.edit_at,

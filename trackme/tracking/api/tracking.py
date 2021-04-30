@@ -182,7 +182,7 @@ async def update_entry(data_input: UpdateTrackingActivity, user_input: UserInput
 
 # DELETE
 @router.delete("/delete", response_model=bool)
-async def delete_one_entry(entry_id: int, token: str = Header(...)):
+async def delete_entries(entry_ids: List[int], token: str = Header(...)):
     """
     Delete one specific entry by id
     ---
@@ -199,7 +199,7 @@ async def delete_one_entry(entry_id: int, token: str = Header(...)):
     user_id = await get_user_by_token(token)
     if user_id is None:
         raise HTTPException(404, NO_USER_TOKEN)
-    return await delete_entry(entry_id, user_id)
+    return await delete_entry(entry_ids, user_id)
 
 
 # @router.delete("/delete_all", response_model=bool)
