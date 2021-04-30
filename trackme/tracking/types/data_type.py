@@ -17,3 +17,7 @@ class Attribute(BaseModel):
     name: str
     topic_id: int
     user_id: Optional[int]
+
+
+class AttributeOutput(BaseModel):
+    name: str

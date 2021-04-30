@@ -1,11 +1,15 @@
+from trackme.tracking.models import entries
 from typing import Optional, List
 from trackme.tracking.types.data_type import (
         Topic,
         Attribute,
 )
-from sqlalchemy.sql import select 
+from sqlalchemy import desc
+from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from trackme.tracking.models import AttributeModel, TopicModel, EntryModel
+from trackme.tracking.models import AttributeModel, TopicModel, EntryModel, TAModel
+from trackme.tracking.types.tracking import TrackingActivity
+from trackme.tracking.types.data_type import AttributeOutput
 from trackme.storage import async_session
 from fastapi.logger import logger 
 
@@ -41,9 +45,11 @@ async def _prepare_attributes(db: AsyncSession, attributes: List[Attribute]) -> 
 async def simple_track(topic_id: int, comment: Optional[str], estimation: int, attributes: List[Attribute], user_id: int) -> bool:
     async with async_session() as db:
         try:
-            collected_attributes = await _prepare_attributes(db, attributes)
-            print(f"user is {user_id}")
-            db.add(EntryModel(comment=comment, estimation=estimation, topic_id=topic_id, attributes=collected_attributes, user_id=user_id))
+            # TODO: validate attribute ids 
+            tracking_attributes = [TAModel(attribute_id=attribute.id) for attribute in attributes]
+            new_tracking = EntryModel(comment=comment, estimation=estimation, topic_id=topic_id, user_id=user_id)
+            new_tracking.tracking_attributes = tracking_attributes
+            db.add_all([new_tracking] + tracking_attributes)
             await db.commit()
             return True
         except Exception as ex:
@@ -51,15 +57,15 @@ async def simple_track(topic_id: int, comment: Optional[str], estimation: int, a
             return False
 
 
-async def _get_entry_by_id(db: AsyncSession, id: int) -> EntryModel:
-    return (await db.execute(select(EntryModel).filter(EntryModel.id == id))).scalars().first()
+async def _get_entry_by_id(db: AsyncSession, entry_id: int, user_id: int) -> Optional[EntryModel]:
+    return (await db.execute(select(EntryModel).filter(EntryModel.id == entry_id).filter(EntryModel.user_id == user_id))).scalars().first()
 
 
-async def edit_entry(user_id: int, id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
+# TODO!
+async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
     async with async_session() as db:
         try:
-            entry = (await _get_entry_by_id(db, id))
-            print(f"this is entry {entry}") 
+            entry = (await _get_entry_by_id(db, entry_id, user_id))
             entry.comment = comment
 
             new_attributes_set = [a for a in entry.attributes if a.id not in delete_attribuets]
@@ -72,3 +78,68 @@ async def edit_entry(user_id: int, id: int, comment: Optional[str], delete_attri
         except Exception as ex:
             logger.error(f"Could not update entry due to {ex}")
             return False
+
+# TODO: where to put validation connected to DB?
+async def delete_entry(entry_id: int, user_id: int) -> bool:
+    async with async_session() as db:
+        try:
+            entry = (await _get_entry_by_id(db, entry_id, user_id))
+            if entry is None:
+                return False
+            await db.execute(delete(EntryModel).where(EntryModel.id == entry_id, EntryModel.user_id == user_id))
+            await db.commit()
+            return True
+        except Exception as ex:
+            logger.error(f"Could not delete entry due to {ex}")
+            return False
+
+
+async def _get_topics_by_name(names: List[str]) -> List[int]:
+    async with async_session() as db:
+        return (await db.execute(select(TopicModel.id).where(TopicModel.name.in_(names)))).scalars().all()
+
+
+async def _get_attributes_by_name(names: List[str]) -> List[int]:
+    async with async_session() as db:
+        return (await db.execute(select(AttributeModel.id).where(AttributeModel.name.in_(names)))).scalars().all()
+
+
+async def _collect_attributes_for_entry(db: AsyncSession, entry_id: int) -> List[AttributeOutput]:
+    attributes = (await db.execute(select(AttributeModel).join(TAModel).filter(TAModel.tracking_id == entry_id).filter(AttributeModel.id == TAModel.attribute_id))).scalars().all()
+    return [AttributeOutput(name=a.name) for a in attributes]
+
+
+async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optional[str], end: Optional[str], attributes: Optional[List[str]], comments: bool) -> List[TrackingActivity]:
+    async with async_session() as db:
+        try:
+            entries_query = select(EntryModel).filter(EntryModel.user_id == user_id)
+            if topics is not None:
+                if bool(topics):
+                    topics_ids = await _get_topics_by_name(topics)
+                    entries_query = entries_query.filter(EntryModel.topic_id.in_(topics_ids))
+            if start is not None:
+                entries_query = entries_query.filter(EntryModel.created_at >= start)
+            if end is not None:
+                entries_query = entries_query.filter(EntryModel.created_at <= end)
+            if comments:
+                entries_query = entries_query.filter(EntryModel.comment.isnot(None))
+            if attributes is not None:
+                if bool(attributes):
+                    attributes_ids = await _get_attributes_by_name(attributes)
+                    entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.attribute_id.in_(attributes_ids))
+            entries_query = entries_query.order_by(desc(EntryModel.created_at))
+            entries = (await db.execute(entries_query)).scalars().all()
+            print(f"these are entries {entries}")
+            entries = [TrackingActivity(id=entry.id, 
+                created_at=entry.created_at, 
+                edit_at=entry.edit_at,
+                comment=entry.comment,
+                estimation=entry.estimation,
+                topic_id=entry.topic_id,
+                user_id=entry.user_id,
+                attributes= await _collect_attributes_for_entry(db, entry.id)) for entry in entries]
+            return entries
+        except Exception as ex:
+            logger.error(f"Could not collect entries due to {ex}")
+            return []
+
