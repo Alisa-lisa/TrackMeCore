@@ -27,8 +27,12 @@ def upgrade():
     op.create_table('attributes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('topic_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['topic_id'], ['topics.id'], ),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('topic_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['topic_id'], ['topics.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
 

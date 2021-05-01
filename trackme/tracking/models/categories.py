@@ -1,5 +1,5 @@
 """ categorical classification for the tracking data """
-from sqlalchemy import Column, ForeignKey, Integer, String 
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from trackme.storage import Base
@@ -21,7 +21,8 @@ class Attribute(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    topic_id = Column(Integer, ForeignKey('topics.id'))
+    topic_id = Column(Integer, ForeignKey('topics.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-
+    deleted_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
     tracking = relationship("TrackingAndAttributes", backref="attributes")
