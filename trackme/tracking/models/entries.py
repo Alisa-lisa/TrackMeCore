@@ -1,5 +1,5 @@
 """ central model for data collection """
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Table
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -12,9 +12,11 @@ class TrackingAndAttributes(Base):
 
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, default=datetime.now())
-    last_edited_at = Column(DateTime, nullable=True)
+    deleted_at = Column(DateTime, nullable=True)
     attribute_id = Column(Integer, ForeignKey('attributes.id'))
     tracking_id = Column(Integer, ForeignKey('tracking.id', ondelete="CASCADE"))
+
+    unique_combination = UniqueConstraint('attribute_id', 'tracking_id', name='unique_combo_idx')
 
 
 class TrackingActivity(Base):
