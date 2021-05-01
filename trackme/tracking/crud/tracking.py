@@ -72,7 +72,6 @@ async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete
             # updating entries happens on TAModel: create and delete
             deleted_ta = (await db.execute(select(TAModel).filter(TAModel.attribute_id.in_(delete_attribuets)).filter(TAModel.tracking_id == entry_id).filter(TAModel.deleted_at.is_(
                 None)))).scalars().all()
-            print(f"deleted {deleted_ta}")
             for ta in deleted_ta:
                 ta.deleted_at = datetime.now()
 
@@ -111,7 +110,7 @@ async def _get_attributes_by_name(names: List[str]) -> List[int]:
 
 
 async def _collect_attributes_for_entry(db: AsyncSession, entry_id: int) -> List[AttributeOutput]:
-    attributes = (await db.execute(select(AttributeModel).join(TAModel).filter(TAModel.tracking_id == entry_id).filter(AttributeModel.id == TAModel.attribute_id))).scalars().all()
+    attributes = (await db.execute(select(AttributeModel).join(TAModel).filter(TAModel.deleted_at.is_(None)).filter(TAModel.tracking_id == entry_id).filter(AttributeModel.id == TAModel.attribute_id))).scalars().all()
     return [AttributeOutput(name=a.name) for a in attributes]
 
 
@@ -133,6 +132,7 @@ async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optio
                 if bool(attributes):
                     attributes_ids = await _get_attributes_by_name(attributes)
                     entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.deleted_at.is_(None)).filter(TAModel.attribute_id.in_(attributes_ids))
+
             entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
             entries = [TrackingActivity(id=entry.id, 
