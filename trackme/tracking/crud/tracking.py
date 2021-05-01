@@ -62,7 +62,6 @@ async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int)
     return (await db.execute(select(EntryModel).filter(EntryModel.id.in_(entry_ids)).filter(EntryModel.user_id == user_id))).scalars().all()
 
 
-# TODO!
 async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete_attribuets: List[int], add_attributes: List[Attribute]) -> bool:
     async with async_session() as db:
         try:
@@ -71,7 +70,8 @@ async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], delete
             entry.edit_at = datetime.now()
             
             # updating entries happens on TAModel: create and delete
-            deleted_ta = (await db.execute(select(TAModel).filter(TAModel.attribute_id.in_(delete_attribuets)).filter(TAModel.tracking_id == entry_id).filter(TAModel.deleted_at.isnot(None)))).scalars().all()
+            deleted_ta = (await db.execute(select(TAModel).filter(TAModel.attribute_id.in_(delete_attribuets)).filter(TAModel.tracking_id == entry_id).filter(TAModel.deleted_at.is_(
+                None)))).scalars().all()
             print(f"deleted {deleted_ta}")
             for ta in deleted_ta:
                 ta.deleted_at = datetime.now()
@@ -132,7 +132,7 @@ async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optio
             if attributes is not None:
                 if bool(attributes):
                     attributes_ids = await _get_attributes_by_name(attributes)
-                    entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.deleted_at.isnot(None)).filter(TAModel.attribute_id.in_(attributes_ids))
+                    entries_query = entries_query.join(TAModel).filter(TAModel.tracking_id == EntryModel.id).filter(TAModel.deleted_at.is_(None)).filter(TAModel.attribute_id.in_(attributes_ids))
             entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
             entries = [TrackingActivity(id=entry.id, 

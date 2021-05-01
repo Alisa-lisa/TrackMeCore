@@ -7,7 +7,7 @@ Create Date: 2021-04-04 21:00:31.828808
 """
 from alembic import op
 import sqlalchemy as sa
-from trackme.tracking.models.seeder import set_topics
+from trackme.tracking.models.seeder import set_topics, set_default_attributes
 
 # revision identifiers, used by Alembic.
 revision = '637cd44b745f'
@@ -27,16 +27,17 @@ def upgrade():
     op.create_table('attributes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('topic_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['topic_id'], ['topics.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
 
     set_topics(op)
+    set_default_attributes(op)
     # ### end Alembic commands ###
 
 

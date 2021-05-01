@@ -39,7 +39,7 @@ def set_topics(connection: op) -> None:
 def set_default_attributes(connection: op) -> None:
     """ setup default attributes for each of 4 default topics """
     raw_query = """
-    insert into attributes values ({}, '{}', {}, Null);
+    insert into attributes values ({}, '{}', {}, Null, Null, Null);
     """
     idx = 1
     for index, topic in enumerate(TOPICS, start=1):
