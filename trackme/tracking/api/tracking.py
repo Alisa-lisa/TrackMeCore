@@ -1,14 +1,14 @@
-""" very simple tracking API """
+""" All about data collections, editing, deletion, download and upload """
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Header
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from trackme.tracking.types.tracking import (
         TrackingActivityInput,
         UpdateTrackingActivity,
         TrackingActivity,
         FilterTrackingAttributes,
 )
-from trackme.tracking.types.data_type import (
+from trackme.tracking.types.meta import (
         Topic,
         Attribute,
 )
@@ -18,18 +18,12 @@ from trackme.tracking.crud import (
         delete_entry,
         get_user_by_token,
         edit_entry,
-        get_topics,
-        get_attributes,
         does_entry_exist,
         filter_entries,
 )
-# from trackme.tracking.utils import dowload_data
 import logging
 from fastapi.logger import logger
-from fastapi.responses import FileResponse
 from datetime import datetime, date
-import csv
-from typing import List
 
 
 router = APIRouter()
@@ -53,30 +47,6 @@ async def check_user(token: str) -> int:
 
 
 # READ
-@router.get("/topics", response_model=List[Topic])
-async def get_topic_names():
-    """
-    Collect main data topics.
-    ---
-    For now there are 4 hard-coded topics, in the future it will be possible to add custom topics
-    """
-    return await get_topics()
-
-
-@router.get("/attributes", response_model=List[Attribute])
-async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
-    """ 
-    # Collect attributes for specific topic
-    ---
-    ## Parameters:
-    * user_id: optional user id to get custom attributes, if None - collect default attributes
-    * topic_id: topic id to identify specific subgroup of attributes
-
-    ## Returns:
-    List of attributes. Minimal list will consist of default attributes for the topic
-    """
-    return await get_attributes(user_id, topic_id)
-
 
 # this should be get -> put filters into query params
 @router.post("/data", response_model=List[TrackingActivity])
@@ -155,7 +125,6 @@ async def track(data_input: TrackingActivityInput, token: str = Header(...)):
     return await simple_track(data_input.topic_id, data_input.comment, data_input.estimation, data_input.attributes, user_id)
 
 
-# UPDATE
 @router.put("/update", response_model=bool)
 async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(None)):
     """
@@ -200,18 +169,3 @@ async def delete_entries(entry_ids: List[int], token: str = Header(...)):
     if user_id is None:
         raise HTTPException(404, NO_USER_TOKEN)
     return await delete_entry(entry_ids, user_id)
-
-
-# @router.delete("/delete_all", response_model=bool)
-# async def delete_all_data(user_input: UserInput, token: str = Header(None)):
-#     """
-#     Hard delete of all tracking data stored for this user
-#     ---
-#
-#     ## Parameters:
-#     * user_input: name and password to confirm deletion
-#     
-#     ## Returns:
-#     True if successful, False otherwise
-#     """
-#     return False

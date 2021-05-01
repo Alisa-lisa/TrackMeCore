@@ -5,14 +5,14 @@ from .user import (
     delete_user,
     get_user_by_token,
 )
-
 from .tracking import (
-    get_topics,
-    get_attributes,
     simple_track,
     edit_entry,
     delete_entry,
     filter_entries,
 )
-
 from .tracking_validation import does_entry_exist
+from .meta import (
+    get_topics,
+    get_attributes,
+)

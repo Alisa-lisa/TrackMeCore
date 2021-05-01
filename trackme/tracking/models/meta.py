@@ -3,7 +3,6 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from trackme.storage import Base
-from .entries import TrackingAndAttributes
 
 # topic is one of 4 main areas of information: Mental, Social, Physical, Consumable
 class Topic(Base):

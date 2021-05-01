@@ -18,14 +18,23 @@ def app_factory():
     )
 
     # routes
-    from trackme.tracking.api import user_router, tracking_router
+    from trackme.tracking.api import user_router, tracking_router, meta_router
+
     app.include_router(
-            user_router,
-            prefix="/user",
-            tags=["user"],
-            dependencies=[],
-            responses={}
-            )
+        meta_router,
+        prefix="/meta",
+        tags=["meta"],
+        dependencies=[],
+        responses={}
+        )
+
+    app.include_router(
+        user_router,
+        prefix="/user",
+        tags=["user"],
+        dependencies=[],
+        responses={}
+        )
 
     app.include_router(
         tracking_router,

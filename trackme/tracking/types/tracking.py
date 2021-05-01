@@ -2,7 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
-from .data_type import Attribute, AttributeOutput
+from .meta import Attribute, AttributeOutput
 
 
 class TrackingActivity(BaseModel):

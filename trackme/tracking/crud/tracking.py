@@ -1,46 +1,23 @@
 from datetime import datetime
-from trackme.tracking.models import entries
 from typing import Optional, List
-from trackme.tracking.types.data_type import (
-        Topic,
-        Attribute,
-)
+
 from sqlalchemy import desc
 from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from trackme.tracking.models import AttributeModel, TopicModel, EntryModel, TAModel
+
+from trackme.tracking.models import AttributeModel, EntryModel, TAModel
 from trackme.tracking.types.tracking import TrackingActivity
-from trackme.tracking.types.data_type import AttributeOutput
+from trackme.tracking.types.meta import AttributeOutput, Attribute
+
+from trackme.tracking.crud.meta_validation import (
+    _get_attributes_by_name,
+    _get_topics_by_name,
+    _collect_attributes_for_entry,
+)
+
 from trackme.storage import async_session
 from fastapi.logger import logger 
 
-
-
-async def get_topics() -> List[Topic]:
-    async with async_session() as db:
-        try:
-            topics = (await db.execute(select(TopicModel))).scalars().all()
-            return [Topic.from_orm(topic) for topic in topics]
-        except Exception as ex:
-            logger.error(f"Could not collect topics due to {ex}")
-            return []
-
-
-async def get_attributes(user_id: Optional[int], topic_id: int) -> List[Attribute]:
-    async with async_session() as db:
-        try:
-            attributes_statement = select(AttributeModel).filter(AttributeModel.topic_id == topic_id)
-            if user_id is not None:
-                attributes_statement.filter(AttributeModel.user_id == user_id)
-            attributes = (await db.execute(attributes_statement)).scalars().all()
-            return [Attribute.from_orm(attribute) for attribute in attributes]
-        except Exception as ex:
-            logger.error(f"Could not collect attributes due to {ex}")
-            return []
-
-
-async def _prepare_attributes(db: AsyncSession, attributes: List[Attribute]) -> List[AttributeModel]:
-    return (await db.execute(select(AttributeModel).filter(AttributeModel.id.in_([a.id for a in attributes])))).scalars().all()
 
 
 async def simple_track(topic_id: int, comment: Optional[str], estimation: int, attributes: List[Attribute], user_id: int) -> bool:
@@ -98,20 +75,6 @@ async def delete_entry(entry_ids: List[int], user_id: int) -> bool:
             logger.error(f"Could not delete entry due to {ex}")
             return False
 
-
-async def _get_topics_by_name(names: List[str]) -> List[int]:
-    async with async_session() as db:
-        return (await db.execute(select(TopicModel.id).where(TopicModel.name.in_(names)))).scalars().all()
-
-
-async def _get_attributes_by_name(names: List[str]) -> List[int]:
-    async with async_session() as db:
-        return (await db.execute(select(AttributeModel.id).where(AttributeModel.name.in_(names)))).scalars().all()
-
-
-async def _collect_attributes_for_entry(db: AsyncSession, entry_id: int) -> List[AttributeOutput]:
-    attributes = (await db.execute(select(AttributeModel).join(TAModel).filter(TAModel.deleted_at.is_(None)).filter(TAModel.tracking_id == entry_id).filter(AttributeModel.id == TAModel.attribute_id))).scalars().all()
-    return [AttributeOutput(name=a.name) for a in attributes]
 
 
 async def filter_entries(user_id: int, topics: Optional[List[str]], start: Optional[str], end: Optional[str], attributes: Optional[List[str]], comments: bool) -> List[TrackingActivity]:
