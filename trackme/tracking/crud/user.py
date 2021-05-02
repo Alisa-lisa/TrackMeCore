@@ -1,14 +1,11 @@
-from enum import unique
-
-from sqlalchemy import exc
 from trackme.tracking.types.user import UserOptions
 from typing import Optional, Tuple
 import uuid
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.sql import select 
+from sqlalchemy.sql import select
 from trackme.tracking.types.user import (
-        UserInput,
-        UserOutput, 
+    UserInput,
+    UserOutput,
 )
 from trackme.tracking.models import (
     UserModel,
@@ -22,14 +19,18 @@ from trackme.storage import async_session
 
 # create
 async def create_user(user: UserInput) -> Tuple[bool, str]:
-    """ create a new user if possible """
+    """create a new user if possible"""
     async with async_session() as db:
         try:
-            db.add(UserModel(name=user.name, 
-            pwhash=hasher(user),
-            email=user.email,
-            registration=datetime.now(),
-            last_active=datetime.now()))
+            db.add(
+                UserModel(
+                    name=user.name,
+                    pwhash=hasher(user),
+                    email=user.email,
+                    registration=datetime.now(),
+                    last_active=datetime.now(),
+                )
+            )
             await db.commit()
             return True, "success"
         except Exception as ex:
@@ -37,25 +38,29 @@ async def create_user(user: UserInput) -> Tuple[bool, str]:
             return False, f"Error: {ex}"
 
 
-async def auth_user(user: UserInput, 
-        client: Optional[str], ip: Optional[str]) -> Tuple[Optional[str], str]:
-    """ create new access token or return existing one for existing user """
+async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -> Tuple[Optional[str], str]:
+    """create new access token or return existing one for existing user"""
     async with async_session() as db:
         verify_user = await _get_user(db, user)
 
         if verify_user is not None:
-            existing_token = (await db.execute(select(UserActivityModel)\
-                    .filter(UserActivityModel.user_id == verify_user.user_id)\
-                    .filter(UserActivityModel.client == client))).scalars().first()
+            existing_token = (
+                (
+                    await db.execute(
+                        select(UserActivityModel)
+                        .filter(UserActivityModel.user_id == verify_user.user_id)
+                        .filter(UserActivityModel.client == client)
+                    )
+                )
+                .scalars()
+                .first()
+            )
             if existing_token is not None:
                 return str(existing_token.token), "success"
             else:
                 token = UserActivityModel(
-                        user_id=verify_user.user_id,
-                        token=uuid.uuid4(),
-                        activation=datetime.now(),
-                        ip=ip,
-                        client=client)
+                    user_id=verify_user.user_id, token=uuid.uuid4(), activation=datetime.now(), ip=ip, client=client
+                )
                 db.add(token)
                 await db.commit()
                 return str(token.token), "success"
@@ -69,8 +74,7 @@ async def _get_user(db: AsyncSession, user: UserInput) -> Optional[UserOutput]:
     try:
         existing_user = (await db.execute(select(UserModel).where(UserModel.name == user.name))).first()[0]
         if existing_user is not None and verify(existing_user, user):
-            return UserOutput(name=existing_user.name, 
-                    user_id=existing_user.id)
+            return UserOutput(name=existing_user.name, user_id=existing_user.id)
         else:
             return None
     except Exception as ex:
@@ -79,18 +83,16 @@ async def _get_user(db: AsyncSession, user: UserInput) -> Optional[UserOutput]:
 
 
 async def _get_user_id_by_token(db: AsyncSession, token: str) -> Optional[int]:
-    user_id = (await db.execute(select(UserActivityModel.user_id)\
-    .where(UserActivityModel.token == token))).first()
+    user_id = (await db.execute(select(UserActivityModel.user_id).where(UserActivityModel.token == token))).first()
     if user_id is None:
-        return None   
+        return None
     return user_id
 
 
 async def get_user_by_token(token: str) -> Optional[int]:
     async with async_session() as db:
-        user_id = await _get_user_id_by_token(db, token)    
+        user_id = await _get_user_id_by_token(db, token)
         return user_id[0] if user_id is not None else None
-
 
 
 async def _is_valid_name(db: AsyncSession, new_name: str) -> bool:
@@ -114,10 +116,14 @@ async def update_user(update_data: UserOptions, token: str) -> Tuple[bool, str]:
             # get user by token
             user_id = await _get_user_id_by_token(db, token)
             if user_id is None:
-                logger.error(f"Such user does not exist")
+                logger.error("Uuser does not exist")
                 return False, "No user to update"
             user = (await db.execute(select(UserModel).where(UserModel.id == user_id))).first()[0]
-            new_name = update_data.name if update_data.name is not None and await _is_valid_name(db, update_data.name) else user.name
+            new_name = (
+                update_data.name
+                if update_data.name is not None and await _is_valid_name(db, update_data.name)
+                else user.name
+            )
             user.name = new_name
             if update_data.password is not None:
                 user.pwhash = hasher(UserInput(name=new_name, password=update_data.password))
@@ -134,4 +140,3 @@ async def update_user(update_data: UserOptions, token: str) -> Tuple[bool, str]:
 # delete
 async def delete_user(user: UserInput) -> bool:
     return False
-

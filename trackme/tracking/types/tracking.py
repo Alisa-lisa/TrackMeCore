@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 from .meta import Attribute, AttributeOutput
@@ -23,12 +23,6 @@ class FilterTrackingAttributes(BaseModel):
     topics: Optional[List[str]] = None
     attributes: Optional[List[str]] = None
     comments: bool = False
-
-    # TODO: proper validation
-    # @validator('*')
-    # def check_all_filters(cls, values):
-    #     print(values.get("starting_time"))
-    
 
 
 class TrackingActivityInput(BaseModel):

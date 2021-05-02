@@ -1,9 +1,15 @@
 .PHONY: local-setup
 local-setup:
 	poetry config virtualenvs.create true --local
-	poetry config virtualenvs.path ./venv/
+	poetry config virtualenvs.path .venv/
 	poetry install
 	poetry shell
+
+.PHONY: lint
+lint:
+	poetry run black -l 120 .
+	poetry run flake8 .
+	# poetry run mypy . 
 
 
 migrate:

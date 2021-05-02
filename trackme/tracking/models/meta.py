@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 from trackme.storage import Base
 
+
 # topic is one of 4 main areas of information: Mental, Social, Physical, Consumable
 class Topic(Base):
     __tablename__ = "topics"
@@ -20,8 +21,8 @@ class Attribute(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    topic_id = Column(Integer, ForeignKey('topics.id'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    topic_id = Column(Integer, ForeignKey("topics.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     deleted_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
     tracking = relationship("TrackingAndAttributes", backref="attributes")

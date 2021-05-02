@@ -1,13 +1,14 @@
-from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr, validator
+from typing import Optional
+from pydantic import BaseModel
 
 
 class Topic(BaseModel):
     class Config:
         orm_mode = True
+
     id: int
     name: str
-   
+
 
 class Attribute(BaseModel):
     class Config:

@@ -17,9 +17,10 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 import sys
 
-sys.path = ['', '..'] + sys.path[1:]
+sys.path = ["", ".."] + sys.path[1:]
 
 from trackme.storage import Base
+
 target_metadata = Base.metadata
 
 
@@ -67,9 +68,7 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

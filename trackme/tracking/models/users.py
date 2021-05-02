@@ -23,7 +23,7 @@ class UserActivity(Base):
     __tablename__ = "user_activity"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey("users.id"))
     token = Column(UUID(as_uuid=True), unique=True, nullable=False)
     activation = Column(DateTime, nullable=False)
     ip = Column(String, nullable=True)

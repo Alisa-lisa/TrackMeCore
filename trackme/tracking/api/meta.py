@@ -1,22 +1,18 @@
 """ Meta data: topics, attributes handling """
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Header
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi import APIRouter
 
 from trackme.tracking.crud import (
-   get_topics,
-   get_attributes,
+    get_topics,
+    get_attributes,
 )
-import logging
-from fastapi.logger import logger
 
 from trackme.tracking.types.meta import (
-        Topic,
-        Attribute,
+    Topic,
+    Attribute,
 )
 
 router = APIRouter()
-logger.setLevel(logging.ERROR)
 
 
 @router.get("/topics", response_model=List[Topic])
@@ -31,7 +27,7 @@ async def get_topic_names():
 
 @router.get("/attributes", response_model=List[Attribute])
 async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
-    """ 
+    """
     # Collect attributes for specific topic
     ---
     ## Parameters:
@@ -42,5 +38,3 @@ async def get_attributes_names(topic_id: int, user_id: Optional[int] = None):
     List of attributes. Minimal list will consist of default attributes for the topic
     """
     return await get_attributes(user_id, topic_id)
-
-

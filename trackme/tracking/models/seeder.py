@@ -3,11 +3,10 @@
 from alembic import op
 
 
-
 TOPICS = ["MENTAL", "PHYSICAL", "SOCIAL", "CONSUMABLE"]
 """
 MENTAL - feelings, emotions, motivation, mood, etc.
-PHYSICAL - sensations in the body, physical activity like sport 
+PHYSICAL - sensations in the body, physical activity like sport
 SOCIAL - connections and social events like "talked to mom", 1:1 with my boss
 CONSUMPTION - meds, food, etc.
 """
@@ -15,10 +14,11 @@ ATTRITUES = {
     "MENTAL": ["mood", "anxiety", "happiness", "love", "emotions"],
     "SOCIAL": ["activity", "sport", "pain", "sleep"],
     "PHYSICAL": ["family", "friends", "partner", "pets"],
-    "CONSUMABLE": ["food", "alcohol", "meds", "tobacco", "drinks"]
+    "CONSUMABLE": ["food", "alcohol", "meds", "tobacco", "drinks"],
 }
 """
-Attributes are some activities, events, states that can be associated with a data entry and estimate as an additional information
+Attributes are some activities, events, states that can be associated with a data entry
+and estimate as an additional information
 Default values are:
     Mental: mood, anxiety, happiness, love, emotions (similar to fast track - emotional mix)
     Physical: activity, sport, pain, sleep
@@ -37,7 +37,7 @@ def set_topics(connection: op) -> None:
 
 
 def set_default_attributes(connection: op) -> None:
-    """ setup default attributes for each of 4 default topics """
+    """setup default attributes for each of 4 default topics"""
     raw_query = """
     insert into attributes values ({}, '{}', {}, Null, Null, Null);
     """
@@ -45,4 +45,4 @@ def set_default_attributes(connection: op) -> None:
     for index, topic in enumerate(TOPICS, start=1):
         for attribute in ATTRITUES[topic]:
             connection.execute(raw_query.format(idx, attribute, index))
-            idx += 1 
+            idx += 1

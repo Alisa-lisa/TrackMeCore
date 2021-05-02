@@ -6,17 +6,16 @@ from datetime import datetime
 from trackme.storage import Base
 
 
-
 class TrackingAndAttributes(Base):
     __tablename__ = "tracking_attributes"
 
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, default=datetime.now())
     deleted_at = Column(DateTime, nullable=True)
-    attribute_id = Column(Integer, ForeignKey('attributes.id'))
-    tracking_id = Column(Integer, ForeignKey('tracking.id', ondelete="CASCADE"))
+    attribute_id = Column(Integer, ForeignKey("attributes.id"))
+    tracking_id = Column(Integer, ForeignKey("tracking.id", ondelete="CASCADE"))
 
-    unique_combination = UniqueConstraint('attribute_id', 'tracking_id', name='unique_combo_idx')
+    unique_combination = UniqueConstraint("attribute_id", "tracking_id", name="unique_combo_idx")
 
 
 class TrackingActivity(Base):
@@ -31,4 +30,6 @@ class TrackingActivity(Base):
     topic_id = Column(Integer, ForeignKey("topics.id"), nullable=True)  # missing topic id is fast-track case
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    tracking_attributes = relationship("TrackingAndAttributes",uselist=True, backref="tracking", cascade="all, delete-orphan")
+    tracking_attributes = relationship(
+        "TrackingAndAttributes", uselist=True, backref="tracking", cascade="all, delete-orphan"
+    )

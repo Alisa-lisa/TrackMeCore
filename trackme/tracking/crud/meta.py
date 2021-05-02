@@ -1,12 +1,12 @@
 from typing import List, Optional
 from trackme.tracking.types.meta import (
-        Topic,
-        Attribute,
+    Topic,
+    Attribute,
 )
 from trackme.tracking.models import AttributeModel, TopicModel
 from sqlalchemy.sql import select
 from trackme.storage import async_session
-from fastapi.logger import logger 
+from fastapi.logger import logger
 
 
 async def get_topics() -> List[Topic]:
@@ -30,5 +30,3 @@ async def get_attributes(user_id: Optional[int], topic_id: int) -> List[Attribut
         except Exception as ex:
             logger.error(f"Could not collect attributes due to {ex}")
             return []
-
-
