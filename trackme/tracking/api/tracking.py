@@ -1,7 +1,6 @@
 """ All about data collections, editing, deletion, download and upload """
 from typing import List
 from fastapi import APIRouter, HTTPException, Header
-from fastapi.responses import JSONResponse
 from trackme.tracking.types.tracking import (
     TrackingActivityInput,
     UpdateTrackingActivity,
@@ -11,7 +10,7 @@ from trackme.tracking.types.tracking import (
 from trackme.tracking.crud import (
     simple_track,
     delete_entry,
-    get_user_by_token,
+    get_user,
     edit_entry,
     does_entry_exist,
     filter_entries,
@@ -33,7 +32,7 @@ UNKNOWN_ID = "No entry with this id was found"
 async def check_user(token: str) -> int:
     if token is None:
         raise HTTPException(401, NO_TOKEN)
-    user_id = await get_user_by_token(token)
+    user_id = await get_user(token)
     if user_id is None:
         raise HTTPException(404, NO_USER_TOKEN)
     return user_id
@@ -68,12 +67,12 @@ async def collect_filtered_entries(filter_conditions: FilterTrackingAttributes, 
     )
 
 
-@router.get("/download")
+@router.get("/download", response_model=bool)
 async def download_data(token: str = Header(...)):
     """
     Collect user data in one file
     """
-    return JSONResponse(success=False, error="Not implemented yet")
+    return False
 
 
 # WRITE
@@ -89,11 +88,7 @@ async def track(data_input: TrackingActivityInput, token: str = Header(...)):
     ## Returns:
     True if operation is successful, False otherwise
     """
-    if token is None:
-        raise HTTPException(401, NO_TOKEN)
-    user_id = await get_user_by_token(token)
-    if user_id is None:
-        raise HTTPException(404, NO_USER_TOKEN)
+    user_id = await check_user(token)
     return await simple_track(
         data_input.topic_id, data_input.comment, data_input.estimation, data_input.attributes, user_id
     )
@@ -112,13 +107,10 @@ async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(N
     ## Returns:
     True if successful, False otherwise
     """
-    if token is None:
-        raise HTTPException(401, NO_TOKEN)
-    user_id = await get_user_by_token(token)
-    if user_id is None:
-        raise HTTPException(404, NO_USER_TOKEN)
-    if not (await does_entry_exist(data_input.id)):
-        raise HTTPException(400, UNKNOWN_ID)
+    user_id = await check_user(token)
+    entry_id = await does_entry_exist(data_input.id)
+    if not entry_id:
+        raise HTTPException(404, "Entry does not exist")
     return await edit_entry(
         user_id, data_input.id, data_input.comment, data_input.delete_attribuets, data_input.add_attributes
     )
@@ -138,9 +130,5 @@ async def delete_entries(entry_ids: List[int], token: str = Header(...)):
     True if successful, False otherwise
 
     """
-    if token is None:
-        raise HTTPException(401, NO_TOKEN)
-    user_id = await get_user_by_token(token)
-    if user_id is None:
-        raise HTTPException(404, NO_USER_TOKEN)
+    user_id = await check_user(token)
     return await delete_entry(entry_ids, user_id)

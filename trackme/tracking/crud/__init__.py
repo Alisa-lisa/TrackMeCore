@@ -3,8 +3,8 @@ from .user import (
     auth_user,
     update_user,
     delete_user,
-    get_user_by_token,
 )
+from .user_validation import get_user_id_by_token, get_user
 from .tracking import (
     simple_track,
     edit_entry,

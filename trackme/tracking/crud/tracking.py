@@ -53,7 +53,10 @@ async def edit_entry(
 ) -> bool:
     async with async_session() as db:
         try:
-            entry = (await _get_entry_by_id(db, [entry_id], user_id))[0]
+            entry = await _get_entry_by_id(db, [entry_id], user_id)
+            if entry is None:
+                return False
+            entry = entry[0]
             entry.comment = comment
             entry.edit_at = datetime.now()
 

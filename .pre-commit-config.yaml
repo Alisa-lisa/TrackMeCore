@@ -1,0 +1,23 @@
+repos:
+- repo: local
+  hooks:
+        - id: black
+          name: black
+          entry: poetry run black -l 120
+          language: system
+          types: [python]
+          pass_filenames: false
+
+        - id: flake
+          name: flake
+          entry: poetry run flake8 .
+          language: system
+          types: [python]
+          pass_filenames: false
+
+        - id: mypy
+          name: mypy
+          entry: poetry run mypy .
+          language: system
+          types: [python]
+          pass_filenames: false
