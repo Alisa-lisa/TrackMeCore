@@ -13,14 +13,14 @@ alembic = "^1.5.8"
 pydantic = {extras = ["email"], version = "^1.8.1"}
 python-dotenv = "^0.17.0"
 asyncpg = "^0.22.0"
-psycopg2 = "^2.8.6"
 Hypercorn = "^0.11.2"
 passlib = "^1.7.4"
 python-multipart = "^0.0.5"
 argon2-cffi = "^20.1.0"
-pre-commit = "^2.12.1"
 
 [tool.poetry.dev-dependencies]
+pre-commit = "^2.12.1"
+psycopg2-binary = "*"
 pytest = "^6.2.3"
 black = "^21.4b2"
 flake8 = "^3.9.1"

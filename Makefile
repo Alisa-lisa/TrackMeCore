@@ -27,3 +27,8 @@ db-down:
 local-run:
 	poetry run hypercorn -b 0.0.0.0:5000 -w 1 app:app 	
 
+
+.PHONY: docker-run
+docker-run:
+	docker build --rm -t trackme . && docker run --rm -p 5000:5000 --env-file .env --network="host" --name trackme-back trackme
+

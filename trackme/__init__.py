@@ -1,11 +1,5 @@
 """ setup module """
-from trackme.tracking.models import (
-    UserModel,
-    UserActivityModel,
-    TopicModel,
-    AttributeModel,
-    EntryModel,
-)
+from trackme.tracking.models import *
 from fastapi import FastAPI
 
 
