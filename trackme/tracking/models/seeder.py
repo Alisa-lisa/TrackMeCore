@@ -11,10 +11,10 @@ SOCIAL - connections and social events like "talked to mom", 1:1 with my boss
 CONSUMPTION - meds, food, etc.
 """
 ATTRITUES = {
-    "MENTAL": ["mood", "anxiety", "happiness", "love", "emotions"],
-    "SOCIAL": ["activity", "sport", "pain", "sleep"],
-    "PHYSICAL": ["family", "friends", "partner", "pets"],
-    "CONSUMABLE": ["food", "alcohol", "meds", "tobacco", "drinks"],
+    "MENTAL": ["mood", "pain", "anxiety", "joy", "happiness", "excitement", "calmness", "fear", "motivation"],
+    "SOCIAL": ["family", "pet", "friends", "online communication", "events", "sport"],
+    "PHYSICAL": ["sport", "sleep", "hygine", "meditation", "pain", "walk", "chores"],
+    "CONSUMABLE": ["food", "alcohol", "soft drinks", "water", "coffee", "nicotine", "meds"],
 }
 """
 Attributes are some activities, events, states that can be associated with a data entry
