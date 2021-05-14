@@ -11,6 +11,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-root --no-ansi
 
 COPY app.py /app/
+COPY alembic.ini /app/alembic.ini
 COPY trackme/ /app/trackme/ 
 COPY run.sh /app/
 RUN chmod +x run.sh

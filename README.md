@@ -5,11 +5,28 @@ and identify some useful patterns, correlations and trends to better adjust habi
 
 
 ## Local setup
+
+### DB
+1. make sure you have postgres instance running
+2. to prepare db access run:
+```
+CREATE DATABASE trackme;
+CREATE USER root;
+GRANT ALL PRIVELEGES ON DATABASE trackme TO root;
+```
+
+### Local dev
 1. you will need python 3.9+ and [poetry](https://python-poetry.org/docs/#installation) installed
 2. rename `.env.example` to `.env` and adjust the variables to your system configuration
 3. to setup dependencies for local run or development: `make local-setup`
+4. run `make db-up` to prepare db
 4. to run locally: `make local-run` and go to `localhost:5000/docs` to see OpenAPI docs 
-5. to run locally-built docker: `make docker-run`
+
+
+### Docker setup
+1. run `make build`
+2. to prepare db: `ocker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head`
+3. and to run the app: `make run`
 
 ## Development
 1. run linters: `make linter`
