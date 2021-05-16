@@ -1,7 +1,6 @@
 from .user import (
     create_user,
     auth_user,
-    update_user,
     delete_user,
 )
 from .user_validation import get_user_id_by_token, get_user

@@ -17,7 +17,7 @@ class UserOutput(BaseModel):
 
 class UserOptions(BaseModel):
     name: Optional[str]
-    password: Optional[str]
+    # password: Optional[str]
     email: Optional[str]
 
 

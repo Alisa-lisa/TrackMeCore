@@ -1,4 +1,3 @@
-from trackme.tracking.types.user import UserOptions
 from typing import Optional, Tuple
 import uuid
 from sqlalchemy.sql import select
@@ -8,8 +7,8 @@ from trackme.tracking.types.user import (
 from .user_validation import (
     _get_user,
     get_user_id_by_token,
-    _is_email_valid,
-    _is_valid_name,
+    # _is_email_valid,
+    # _is_valid_name,
 )
 from trackme.tracking.models import (
     UserModel,
@@ -46,7 +45,7 @@ async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -
     """create new access token or return existing one for existing user"""
     async with async_session() as db:
         verify_user = await _get_user(db, user)
-
+        print(f"user to delete {verify_user}")
         if verify_user is not None:
             existing_token = (
                 (
@@ -74,33 +73,43 @@ async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -
 
 
 # update
-async def update_user(update_data: UserOptions, token: str) -> Tuple[bool, str]:
-    async with async_session() as db:
-        try:
-            # get user by token
-            user_id = await get_user_id_by_token(db, token)
-            if user_id is None:
-                logger.error("Uuser does not exist")
-                return False, "No user to update"
-            user = (await db.execute(select(UserModel).where(UserModel.id == user_id))).first()[0]
-            new_name = (
-                update_data.name
-                if update_data.name is not None and await _is_valid_name(db, update_data.name)
-                else user.name
-            )
-            user.name = new_name
-            if update_data.password is not None:
-                user.pwhash = hasher(UserInput(name=new_name, password=update_data.password))
-            if update_data.email is not None:
-                new_email = update_data.email if await _is_email_valid(db, update_data.email) else user.email
-                user.email = new_email
-            await db.commit()
-            return True, "success"
-        except Exception as ex:
-            logger.error(f"Could not update user due to {ex}")
-            return False, "Update failed"
+# async def update_user(update_data: UserOptions, token: str) -> Tuple[bool, str]:
+#     """ update some less importnat fields, password update is done separately """
+#     async with async_session() as db:
+#         try:
+#             # get user by token
+#             user_id = await get_user_id_by_token(db, token)
+#             if user_id is None:
+#                 logger.error("User does not exist")
+#                 return False, "No user to update"
+#             user = (await db.execute(select(UserModel).where(UserModel.id == user_id))).scalars().first()
+#             # name and password needs to be updated together always
+#             new_name = (
+#                 update_data.name
+#                 if update_data.name is not None and await _is_valid_name(db, update_data.name)
+#                 else user.name
+#             )
+#             user.name = new_name
+#             if update_data.email is not None:
+#                 new_email = update_data.email if await _is_email_valid(db, update_data.email) else user.email
+#                 user.email = new_email
+#             await db.commit()
+#             return True, "success"
+#         except Exception as ex:
+#             logger.error(f"Could not update user due to {ex}")
+#             return False, "Update failed"
 
 
 # delete
-async def delete_user(user: UserInput) -> bool:
-    return False
+async def delete_user(user: UserInput, token: str) -> bool:
+    async with async_session() as db:
+        try:
+            print(f"incoming token is {token}")
+            user_to_delete_id = await get_user_id_by_token(db, token)
+            user = (await db.execute(select(UserModel).where(UserModel.id == user_to_delete_id))).scalars().first()
+            await db.delete(user)
+            await db.commit()
+            return True
+        except Exception as ex:
+            logger.error(f"Could not delete user due to {ex}")
+            return False

@@ -2,12 +2,10 @@ from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Header
 from trackme.tracking.types.user import (
     UserInput,
-    UserOptions,
 )
 from trackme.tracking.crud import (
     create_user,
     auth_user,
-    update_user as edit_user,
     delete_user,
 )
 from fastapi.logger import logger
@@ -15,7 +13,7 @@ import logging
 
 
 router = APIRouter()
-logger.setLevel(logging.ERROR)  # set to DEBUG for development
+logger.setLevel(logging.ERROR)
 
 
 @router.post("/register", response_model=bool)
@@ -36,25 +34,26 @@ async def login_user(input_user: UserInput):
     return token
 
 
-@router.put("/update", response_model=bool)
-async def update_user(input_update: UserOptions, token: str = Header(None)):
-    """
-    Update some user information
-    ---
-
-    ## Parameters:
-
-
-    ## Returns:
-
-    """
-    success, message = await edit_user(input_update, token)
-    if not success:
-        raise HTTPException(400, message)
-    return True
+# @router.put("/update", response_model=bool)
+# async def update_user(input_update: UserOptions, token: str = Header(None)):
+#     """
+#     Update some user information
+#     ---
+#
+#     ## Parameters:
+#
+#
+#     ## Returns:
+#
+#     """
+#     success, message = await edit_user(input_update, token)
+#     if not success:
+#         raise HTTPException(400, message)
+#     return True
+#
 
 
 @router.delete("/delete", response_model=bool)
 async def remove_user(input_user: UserInput, token: str = Header(None)):
     """user should be able to delete himself form the platform"""
-    return await delete_user(input_user)
+    return await delete_user(input_user, token)
