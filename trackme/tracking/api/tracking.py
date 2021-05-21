@@ -1,11 +1,10 @@
 """ All about data collections, editing, deletion, download and upload """
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Header
 from trackme.tracking.types.tracking import (
     TrackingActivityInput,
     UpdateTrackingActivity,
     TrackingActivity,
-    FilterTrackingAttributes,
 )
 from trackme.tracking.crud import (
     simple_track,
@@ -41,8 +40,15 @@ async def check_user(token: str) -> int:
 # READ
 
 # this should be get -> put filters into query params
-@router.post("/data", response_model=List[TrackingActivity])
-async def collect_filtered_entries(filter_conditions: FilterTrackingAttributes, token: str = Header(...)):
+@router.get("/filter", response_model=List[TrackingActivity])
+async def collect_filtered_entries(
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    topics: Optional[int] = None,
+    attributes: Optional[int] = None,
+    comments: bool = False,
+    token: str = Header(...),
+):
     """
     # Filter tracking entries
     ---
@@ -57,14 +63,7 @@ async def collect_filtered_entries(filter_conditions: FilterTrackingAttributes, 
     List of tracking entries satisfying filter conditions, sorted by recency
     """
     user = await check_user(token)
-    return await filter_entries(
-        user,
-        filter_conditions.topics,
-        filter_conditions.starting_time,
-        filter_conditions.ending_time,
-        filter_conditions.attributes,
-        filter_conditions.comments,
-    )
+    return await filter_entries(user, topics, start, end, attributes, comments)
 
 
 @router.get("/download", response_model=bool)

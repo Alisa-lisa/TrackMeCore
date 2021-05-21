@@ -17,14 +17,6 @@ class TrackingActivity(BaseModel):
     attributes: List[AttributeOutput]
 
 
-class FilterTrackingAttributes(BaseModel):
-    starting_time: Optional[str] = None
-    ending_time: Optional[str]
-    topics: Optional[List[str]] = None
-    attributes: Optional[List[str]] = None
-    comments: bool = False
-
-
 class TrackingActivityInput(BaseModel):
     topic_id: int
     comment: Optional[str]

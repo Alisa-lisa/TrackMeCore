@@ -10,8 +10,6 @@ from trackme.tracking.types.tracking import TrackingActivity
 from trackme.tracking.types.meta import Attribute
 
 from trackme.tracking.crud.meta_validation import (
-    _get_attributes_by_name,
-    _get_topics_by_name,
     _collect_attributes_for_entry,
 )
 
@@ -103,10 +101,10 @@ async def delete_entry(entry_ids: List[int], user_id: int) -> bool:
 
 async def filter_entries(
     user_id: int,
-    topics: Optional[List[str]],
+    topics: Optional[int],
     start: Optional[str],
     end: Optional[str],
-    attributes: Optional[List[str]],
+    attributes: Optional[int],
     comments: bool,
 ) -> List[TrackingActivity]:
     async with async_session() as db:
@@ -114,8 +112,7 @@ async def filter_entries(
             entries_query = select(EntryModel).filter(EntryModel.user_id == user_id)
             if topics is not None:
                 if bool(topics):
-                    topics_ids = await _get_topics_by_name(topics)
-                    entries_query = entries_query.filter(EntryModel.topic_id.in_(topics_ids))
+                    entries_query = entries_query.filter(EntryModel.topic_id == topics)
             if start is not None:
                 entries_query = entries_query.filter(EntryModel.created_at >= start)
             if end is not None:
@@ -124,12 +121,11 @@ async def filter_entries(
                 entries_query = entries_query.filter(EntryModel.comment.isnot(None))
             if attributes is not None:
                 if bool(attributes):
-                    attributes_ids = await _get_attributes_by_name(attributes)
                     entries_query = (
                         entries_query.join(TAModel)
                         .filter(TAModel.tracking_id == EntryModel.id)
                         .filter(TAModel.deleted_at.is_(None))
-                        .filter(TAModel.attribute_id.in_(attributes_ids))
+                        .filter(TAModel.attribute_id == attributes)
                     )
 
             entries_query = entries_query.order_by(desc(EntryModel.created_at))

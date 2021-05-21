@@ -32,7 +32,6 @@ async def get_user(token: str) -> Optional[int]:
 
 async def get_user_id_by_token(db: AsyncSession, token: str) -> Optional[int]:
     user = (await db.execute(select(UserActivityModel).where(UserActivityModel.token == token))).scalars().first()
-    print(f"for token {token} user is {user}")
     return user.user_id if user is not None else None
 
 
