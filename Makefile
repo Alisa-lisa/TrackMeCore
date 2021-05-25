@@ -11,6 +11,10 @@ lint:
 	poetry run flake8 .
 	poetry run mypy . 
 
+.PHONY: test
+test:
+	poetry run pytest .
+
 
 migrate:
 	poetry run alembic revision --autogenerate -m $(message)

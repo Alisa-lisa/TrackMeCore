@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
+from fastapi import HTTPException
 from trackme.tracking.types.user import UserInput, UserOutput
 from trackme.tracking.models import (
     UserModel,
@@ -11,6 +12,21 @@ from fastapi.logger import logger
 from sqlalchemy.sql import select
 
 from trackme.storage import async_session
+
+
+# TODO: Error messages go into middleware validation
+NO_TOKEN = "No access token provided"
+NO_USER_TOKEN = "Invalid token"
+
+
+# TODO: ideally this should go into specific middleware or auth function
+async def check_user(token: str) -> int:
+    if token is None:
+        raise HTTPException(401, NO_TOKEN)
+    user_id = await get_user(token)
+    if user_id is None:
+        raise HTTPException(404, NO_USER_TOKEN)
+    return user_id
 
 
 async def _get_user(db: AsyncSession, user: UserInput) -> Optional[UserOutput]:

@@ -7,9 +7,9 @@ from trackme.tracking.types.tracking import (
     TrackingActivity,
 )
 from trackme.tracking.crud import (
+    check_user,
     simple_track,
     delete_entry,
-    get_user,
     edit_entry,
     does_entry_exist,
     filter_entries,
@@ -21,25 +21,10 @@ from fastapi.logger import logger
 router = APIRouter()
 logger.setLevel(logging.ERROR)
 
-# TODO: Error messages go into middleware validation
-NO_TOKEN = "No access token provided"
-NO_USER_TOKEN = "Invalid token"
 UNKNOWN_ID = "No entry with this id was found"
 
 
-# TODO: ideally this should go into specific middleware or auth function
-async def check_user(token: str) -> int:
-    if token is None:
-        raise HTTPException(401, NO_TOKEN)
-    user_id = await get_user(token)
-    if user_id is None:
-        raise HTTPException(404, NO_USER_TOKEN)
-    return user_id
-
-
 # READ
-
-# this should be get -> put filters into query params
 @router.get("/filter", response_model=List[TrackingActivity])
 async def collect_filtered_entries(
     start: Optional[str] = None,
@@ -93,6 +78,7 @@ async def track(data_input: TrackingActivityInput, token: str = Header(...)):
     )
 
 
+# TODO: return updated model instead of a bool
 @router.put("/update", response_model=bool)
 async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(None)):
     """

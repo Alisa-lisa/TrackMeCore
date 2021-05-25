@@ -17,6 +17,7 @@ class User(Base):
     last_active = Column(DateTime, nullable=True, index=True)
 
     activity = relationship("UserActivity", backref="users", cascade="all, delete-orphan")
+    tracking = relationship("TrackingActivity", backref="users", cascade="all, delete-orphan")
 
 
 class UserActivity(Base):

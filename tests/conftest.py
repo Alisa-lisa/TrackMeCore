@@ -8,3 +8,13 @@ import pytest
 def client():
     app = app_factory()
     return TestClient(app)
+
+
+def clean_up(client, user_payload, token):
+    client.delete("/user/delete", json=user_payload, headers={"token": token})
+
+
+def user_setup(client, user_payload, skip=False):
+    if not skip:
+        client.post("/user/register", json=user_payload)
+    return client.post("/user/auth", json=user_payload).json()

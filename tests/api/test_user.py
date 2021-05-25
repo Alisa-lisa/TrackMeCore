@@ -51,9 +51,9 @@ def test_failed_remove_user(client):
 
 def test_successful_remove_user(client):
     proper_token = client.post("/user/auth", json={"name": "lolol", "password": "123456"}).json()
-    wrong_delete = client.delete(
+    delete = client.delete(
         "/user/delete", json={"name": "lolol", "password": "123456"}, headers={"token": proper_token}
     )
 
-    assert wrong_delete.status_code == 200
-    assert wrong_delete.json()
+    assert delete.status_code == 200
+    assert delete.json()
