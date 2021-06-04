@@ -1,21 +1,8 @@
 """ central model for data collection """
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean
 from datetime import datetime
 
 from trackme.storage import Base
-
-
-class TrackingAndAttributes(Base):
-    __tablename__ = "tracking_attributes"
-
-    id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, default=datetime.now())
-    deleted_at = Column(DateTime, nullable=True)
-    attribute_id = Column(Integer, ForeignKey("attributes.id"))
-    tracking_id = Column(Integer, ForeignKey("tracking.id", ondelete="CASCADE"))
-
-    unique_combination = UniqueConstraint("attribute_id", "tracking_id", name="unique_combo_idx")
 
 
 class TrackingActivity(Base):
@@ -29,7 +16,8 @@ class TrackingActivity(Base):
 
     topic_id = Column(Integer, ForeignKey("topics.id"), nullable=True)  # missing topic id is fast-track case
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    attribute_id = Column(Integer, ForeignKey("attributes.id", name="tracking_attributes_fk"), nullable=False)
 
-    tracking_attributes = relationship(
-        "TrackingAndAttributes", uselist=True, backref="tracking", cascade="all, delete-orphan"
-    )
+    # the data is not dropped when custom attribute is deleted by the user,
+    # but is kept in stale state for future models to pick up on this change
+    stale = Column(Boolean, default=False)

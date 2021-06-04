@@ -3,26 +3,18 @@ from sqlalchemy.sql import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from trackme.storage import async_session
 
-from trackme.tracking.types.meta import AttributeOutput, Attribute
+from trackme.tracking.types.meta import Attribute
 
-from trackme.tracking.models import AttributeModel, TAModel, TopicModel
+from trackme.tracking.models import AttributeModel, TopicModel
 
 
-async def _collect_attributes_for_entry(db: AsyncSession, entry_id: int) -> List[AttributeOutput]:
-    attributes = (
-        (
-            await db.execute(
-                select(AttributeModel)
-                .join(TAModel)
-                .filter(TAModel.deleted_at.is_(None))
-                .filter(TAModel.tracking_id == entry_id)
-                .filter(AttributeModel.id == TAModel.attribute_id)
-            )
-        )
+async def _collect_attribute_name_for_entry(db: AsyncSession, entry_attribute_id: int) -> str:
+    attribute_name = (
+        (await db.execute(select(AttributeModel.name).filter(AttributeModel.id == entry_attribute_id)))
         .scalars()
-        .all()
+        .first()
     )
-    return [AttributeOutput(name=a.name) for a in attributes]
+    return attribute_name
 
 
 async def _get_topics_by_name(names: List[str]) -> List[int]:

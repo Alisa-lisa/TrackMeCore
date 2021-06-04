@@ -31,7 +31,7 @@ async def collect_filtered_entries(
     end: Optional[str] = None,
     topics: Optional[int] = None,
     attributes: Optional[int] = None,
-    comments: bool = False,
+    comments: bool = True,
     token: str = Header(...),
 ):
     """
@@ -74,12 +74,12 @@ async def track(data_input: TrackingActivityInput, token: str = Header(...)):
     """
     user_id = await check_user(token)
     return await simple_track(
-        data_input.topic_id, data_input.comment, data_input.estimation, data_input.attributes, user_id
+        data_input.topic_id, data_input.comment, data_input.estimation, data_input.attribute, user_id
     )
 
 
 # TODO: return updated model instead of a bool
-@router.put("/update", response_model=bool)
+@router.put("/update", response_model=TrackingActivity)
 async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(None)):
     """
     Adjust specific entry
@@ -96,9 +96,7 @@ async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(N
     entry_id = await does_entry_exist(data_input.id)
     if not entry_id:
         raise HTTPException(404, "Entry does not exist")
-    return await edit_entry(
-        user_id, data_input.id, data_input.comment, data_input.delete_attribuets, data_input.add_attributes
-    )
+    return await edit_entry(user_id, data_input.id, data_input.comment, data_input.attribute)
 
 
 # DELETE

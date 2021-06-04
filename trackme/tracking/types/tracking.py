@@ -1,8 +1,6 @@
-from typing import Optional, List
-from pydantic import BaseModel, Field
+from typing import Optional
+from pydantic import BaseModel
 from datetime import datetime
-
-from .meta import Attribute, AttributeOutput
 
 
 class TrackingActivity(BaseModel):
@@ -14,18 +12,20 @@ class TrackingActivity(BaseModel):
     deleted_at: Optional[datetime]
     topic_id: int
     user_id: int
-    attributes: List[AttributeOutput]
+    attribute: str
 
 
 class TrackingActivityInput(BaseModel):
     topic_id: int
     comment: Optional[str]
     estimation: int
-    attributes: List[Attribute] = Field(default_factory=list, min_items=1)
+    attribute: int
 
 
 class UpdateTrackingActivity(BaseModel):
     id: int
     comment: Optional[str]
-    delete_attribuets: List[int] = Field(default_factory=list)
-    add_attributes: List[Attribute] = Field(default_factory=list)
+    attribute: Optional[int]
+    # TODO: validate that chosen attribute does belong to topic of older state
+    # update of estimate is not allowed at this stage,
+    # since this would be the most important information that we want to keep maximally unbiased

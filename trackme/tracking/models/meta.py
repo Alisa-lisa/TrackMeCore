@@ -25,4 +25,3 @@ class Attribute(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     deleted_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
-    tracking = relationship("TrackingAndAttributes", backref="attributes")
