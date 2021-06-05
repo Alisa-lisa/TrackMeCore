@@ -61,7 +61,7 @@ async def download_data(token: str = Header(...)):
 
 # WRITE
 @router.post("/save", response_model=bool)
-async def track(data_input: TrackingActivityInput, token: str = Header(...)):
+async def track(data_input: List[TrackingActivityInput], token: str = Header(...)):
     """
     Save tracking entry
     ---
@@ -73,9 +73,7 @@ async def track(data_input: TrackingActivityInput, token: str = Header(...)):
     True if operation is successful, False otherwise
     """
     user_id = await check_user(token)
-    return await simple_track(
-        data_input.topic_id, data_input.comment, data_input.estimation, data_input.attribute, user_id
-    )
+    return await simple_track(data_input, user_id)
 
 
 # TODO: return updated model instead of a bool

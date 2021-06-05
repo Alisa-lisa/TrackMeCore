@@ -6,7 +6,7 @@ from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from trackme.tracking.models import EntryModel
-from trackme.tracking.types.tracking import TrackingActivity
+from trackme.tracking.types.tracking import TrackingActivity, TrackingActivityInput
 
 from trackme.tracking.crud.meta_validation import (
     _collect_attribute_name_for_entry,
@@ -16,14 +16,21 @@ from trackme.storage import async_session
 from fastapi.logger import logger
 
 
-async def simple_track(topic_id: int, comment: Optional[str], estimation: int, attribute: int, user_id: int) -> bool:
+async def simple_track(entries: List[TrackingActivityInput], user_id: int) -> bool:
     async with async_session() as db:
         try:
             # TODO: validate attribute ids
-            new_tracking = EntryModel(
-                comment=comment, estimation=estimation, topic_id=topic_id, user_id=user_id, attribute_id=attribute
-            )
-            db.add(new_tracking)
+            trackings = [
+                EntryModel(
+                    comment=entry.comment,
+                    estimation=entry.estimation,
+                    topic_id=entry.topic_id,
+                    user_id=user_id,
+                    attribute_id=entry.attribute,
+                )
+                for entry in entries
+            ]
+            db.add_all(trackings)
             await db.commit()
             return True
         except Exception as ex:
