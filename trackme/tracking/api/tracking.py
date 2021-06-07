@@ -94,7 +94,7 @@ async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(N
     entry_id = await does_entry_exist(data_input.id)
     if not entry_id:
         raise HTTPException(404, "Entry does not exist")
-    return await edit_entry(user_id, data_input.id, data_input.comment, data_input.attribute)
+    return await edit_entry(user_id, data_input.id, data_input.topic, data_input.comment, data_input.attribute)
 
 
 # DELETE

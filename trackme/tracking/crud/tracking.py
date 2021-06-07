@@ -63,7 +63,9 @@ async def _prepare_tracking_attribute(db: AsyncSession, entry: EntryModel) -> Tr
     )
 
 
-async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], attribute: Optional[int]) -> TrackingActivity:
+async def edit_entry(
+    user_id: int, entry_id: int, topic: Optional[int], comment: Optional[str], attribute: Optional[int]
+) -> TrackingActivity:
     async with async_session() as db:
         entry = await _get_entry_by_id(db, [entry_id], user_id)
         if entry is None:
@@ -75,6 +77,8 @@ async def edit_entry(user_id: int, entry_id: int, comment: Optional[str], attrib
             entry.edit_at = datetime.now()
             if attribute is not None:
                 entry.attribute_id = attribute
+            if topic is not None:
+                entry.topic_id = topic
             await db.commit()
         except Exception as ex:
             logger.error(f"Could not update entry due to {ex}")
