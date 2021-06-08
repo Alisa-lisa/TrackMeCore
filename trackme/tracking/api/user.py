@@ -46,7 +46,7 @@ async def login_user(input_user: UserInput):
 #     ## Returns:
 #
 #     """
-#     success, message = await edit_user(input_update, token)
+#     success, message = await edit_user(input_update, tokens
 #     if not success:
 #         raise HTTPException(400, message)
 #     return True
@@ -56,4 +56,6 @@ async def login_user(input_user: UserInput):
 @router.delete("/delete", response_model=bool)
 async def remove_user(input_user: UserInput, token: str = Header(None)):
     """user should be able to delete himself form the platform"""
+    if token is None:
+        raise HTTPException(403, "Unknown user")
     return await delete_user(input_user, token)

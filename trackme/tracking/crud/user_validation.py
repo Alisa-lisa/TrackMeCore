@@ -31,8 +31,8 @@ async def check_user(token: str) -> int:
 
 async def _get_user(db: AsyncSession, user: UserInput) -> Optional[UserOutput]:
     try:
-        existing_user = (await db.execute(select(UserModel).where(UserModel.name == user.name))).first()[0]
-        if existing_user is not None and verify(existing_user, user):
+        existing_user = (await db.execute(select(UserModel).where(UserModel.name == user.name))).scalars().first()
+        if existing_user is not None and verify(existing_user.pwhash, user):
             return UserOutput(name=existing_user.name, user_id=existing_user.id)
         else:
             return None

@@ -19,7 +19,7 @@ class TrackingActivityInput(BaseModel):
     topic_id: Optional[int]
     comment: Optional[str]
     estimation: int = Field(..., le=5, ge=-5)
-    attribute: int
+    attribute: Optional[int]
 
 
 class UpdateTrackingActivity(BaseModel):

@@ -10,7 +10,7 @@ from .tracking import (
     delete_entry,
     filter_entries,
 )
-from .tracking_validation import does_entry_exist
+from .tracking_validation import does_entry_exist, validate_tracking_ids
 from .meta import (
     get_topics,
     get_attributes,

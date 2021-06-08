@@ -86,7 +86,6 @@ async def edit_entry(
             return await _prepare_tracking_attribute(db, entry)
 
 
-# TODO: where to put validation connected to DB?
 async def delete_entry(entry_ids: List[int], user_id: int) -> bool:
     async with async_session() as db:
         try:

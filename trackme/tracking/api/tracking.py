@@ -1,6 +1,6 @@
 """ All about data collections, editing, deletion, download and upload """
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, Header
 from trackme.tracking.types.tracking import (
     TrackingActivityInput,
     UpdateTrackingActivity,
@@ -11,7 +11,7 @@ from trackme.tracking.crud import (
     simple_track,
     delete_entry,
     edit_entry,
-    does_entry_exist,
+    validate_tracking_ids,
     filter_entries,
 )
 import logging
@@ -20,8 +20,6 @@ from fastapi.logger import logger
 
 router = APIRouter()
 logger.setLevel(logging.ERROR)
-
-UNKNOWN_ID = "No entry with this id was found"
 
 
 # READ
@@ -41,7 +39,7 @@ async def collect_filtered_entries(
     - starting time stamp
     - ending time stamp
     - topics: List[str]
-    - comment: bool
+    - comment: bool, default True
     - attributes: List[str]
 
     ## Returns:
@@ -66,7 +64,7 @@ async def track(data_input: List[TrackingActivityInput], token: str = Header(...
     Save tracking entry
     ---
     ## Parameters:
-    - data_input: TrackingActivityInput
+    - data_input: List[TrackingActivityInput]
     - token for user identification
 
     ## Returns:
@@ -76,9 +74,8 @@ async def track(data_input: List[TrackingActivityInput], token: str = Header(...
     return await simple_track(data_input, user_id)
 
 
-# TODO: return updated model instead of a bool
 @router.put("/update", response_model=TrackingActivity)
-async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(None)):
+async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(...)):
     """
     Adjust specific entry
     ---
@@ -91,10 +88,8 @@ async def update_entry(data_input: UpdateTrackingActivity, token: str = Header(N
     True if successful, False otherwise
     """
     user_id = await check_user(token)
-    entry_id = await does_entry_exist(data_input.id)
-    if not entry_id:
-        raise HTTPException(404, "Entry does not exist")
-    return await edit_entry(user_id, data_input.id, data_input.topic, data_input.comment, data_input.attribute)
+    entry_id = (await validate_tracking_ids([data_input.id]))[0]
+    return await edit_entry(user_id, entry_id, data_input.topic, data_input.comment, data_input.attribute)
 
 
 # DELETE
@@ -112,4 +107,5 @@ async def delete_entries(entry_ids: List[int], token: str = Header(...)):
 
     """
     user_id = await check_user(token)
-    return await delete_entry(entry_ids, user_id)
+    existing_ids = await validate_tracking_ids(entry_ids)
+    return await delete_entry(existing_ids, user_id)

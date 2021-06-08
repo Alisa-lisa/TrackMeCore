@@ -16,7 +16,7 @@ class TrackingActivity(Base):
 
     topic_id = Column(Integer, ForeignKey("topics.id"), nullable=True)  # missing topic id is fast-track case
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    attribute_id = Column(Integer, ForeignKey("attributes.id", name="tracking_attributes_fk"), nullable=False)
+    attribute_id = Column(Integer, ForeignKey("attributes.id", name="tracking_attributes_fk"), nullable=True)
 
     # the data is not dropped when custom attribute is deleted by the user,
     # but is kept in stale state for future models to pick up on this change

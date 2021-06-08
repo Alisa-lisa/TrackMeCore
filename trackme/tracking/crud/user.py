@@ -1,9 +1,7 @@
 from typing import Optional, Tuple
 import uuid
 from sqlalchemy.sql import select
-from trackme.tracking.types.user import (
-    UserInput,
-)
+from trackme.tracking.types.user import UserInput
 from .user_validation import (
     _get_user,
     get_user_id_by_token,
@@ -14,7 +12,7 @@ from trackme.tracking.models import (
     UserModel,
     UserActivityModel,
 )
-from trackme.tracking.helpers.hashing import hasher
+from trackme.tracking.helpers.hashing import hasher, verify
 from datetime import datetime
 from fastapi.logger import logger
 from trackme.storage import async_session
@@ -103,9 +101,15 @@ async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -
 async def delete_user(user: UserInput, token: str) -> bool:
     async with async_session() as db:
         try:
+            # collect user
             user_to_delete_id = await get_user_id_by_token(db, token)
-            user = (await db.execute(select(UserModel).where(UserModel.id == user_to_delete_id))).scalars().first()
-            await db.delete(user)
+            user_to_delete = (
+                (await db.execute(select(UserModel).where(UserModel.id == user_to_delete_id))).scalars().first()
+            )
+            # check if name and password are consistent
+            is_confirmed = verify(user_to_delete.pwhash, user)
+            if is_confirmed:
+                await db.delete(user_to_delete)
             await db.commit()
             return True
         except Exception as ex:
