@@ -42,4 +42,5 @@ jobs:
                         # - name: Install dependencies
                         #   run: make local-setup
                         - name: Run alembic migration
-                          run: make build && make docker-migrate
+                          run: |
+                                  docker build -t trackme && docker run --rm --env-file .env --network="host" trackme alembic upgrade head 
