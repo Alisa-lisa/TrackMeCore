@@ -29,8 +29,8 @@ jobs:
                           run: |
                                   touch .env
                                   echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
-                        - name: Build container
-                          run: make build 
+                        # - name: Build container
+                        #   run: make build 
                         # - name: Setting up environment
                         #   uses: actions/setup-python@v2
                         #   with:
@@ -42,4 +42,4 @@ jobs:
                         # - name: Install dependencies
                         #   run: make local-setup
                         - name: Run alembic migration
-                          run: make docker-migrate
+                          run: make build && make docker-migrate
