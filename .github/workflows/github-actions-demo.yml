@@ -11,9 +11,17 @@ jobs:
                 runs-on: ubuntu-latest
                 strategy:
                         matrix:
-                                postgres: [13]
                                 python: [3.9]
                                 poetry: [1.1.4]
+                services:
+                        postgres:
+                                image: postgres:latest
+                                env:
+                                        POSTGRES_DB: trackme
+                                        POSTGRES_PASSWORD: postgres
+                                        POSTGRES_USER: postgres
+                                ports:
+                                        - 5432:5432
                 steps:
                         - name: Git checkout 
                           uses: actions/checkout@v2
@@ -22,11 +30,6 @@ jobs:
                           uses: actions/setup-python@v2
                           with:
                                   python-version: ${{ matrix.python }}
-                        
-                        - name: Prepare DB
-                          uses: harmon758/postgresql-action@v1
-                          with:
-                                  postgresql version: ${{ matrix.postgres }}
                         
                         - name: Prepare poetry
                           uses: abatilo/actions-poetry@v2.0.0
@@ -37,8 +40,8 @@ jobs:
                         - name: Provide dotenv file
                           run: |
                                   touch .env
-                                  echo "DB_URI=postgresql+asyncpg://localhost:5432/trackme" >> .env
+                                  echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
                         - name: Run alembic migration
                           run: poetry run alembic upgrade head 
                         - name: Run tests
-                          run: make test
+                          run: make docker-test

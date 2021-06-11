@@ -25,7 +25,7 @@ GRANT ALL PRIVELEGES ON DATABASE trackme TO root;
 
 ### Docker setup
 1. run `make build`
-2. to prepare db: `ocker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head`
+2. to prepare db: `docker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head`
 3. and to run the app: `make run`
 
 ## Development
