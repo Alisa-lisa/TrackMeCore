@@ -37,7 +37,7 @@ jobs:
                         - name: Provide dotenv file
                           run: |
                                   touch .env
-                                  cp .env.example >> .env
+                                  cp .env.example .env
                         - name: Run alembic migration
                           run: poetry run alembic upgrade head 
                         - name: Run tests
