@@ -37,7 +37,7 @@ jobs:
                         - name: Provide dotenv file
                           run: |
                                   touch .env
-                                  cp .env.example .env
+                                  echo "DB_URI=postgresql+asyncpg://localhost:5432/trackme" >> .env
                         - name: Run alembic migration
                           run: poetry run alembic upgrade head 
                         - name: Run tests
