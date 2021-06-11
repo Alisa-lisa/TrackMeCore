@@ -1,0 +1,43 @@
+name: Tracking backend preparation
+
+on:
+        push:
+                branches:
+                        - main
+
+jobs:
+        integration-tests:
+                name: Integration tests
+                runs-on: ubuntu-latest
+                strategy:
+                        matrix:
+                                postgres: [13]
+                                version: [3.9]
+                steps:
+                        - name: Git checkout 
+                          uses: actions/checkout@v2
+
+                        - name: Setting up environment
+                          uses: actions/setup-python@v2
+                          with:
+                                  python-version: ${{ matrix.python }}
+                        
+                        - name: Prepare DB
+                          uses: harmon758/postgresql-action@v1
+                          with:
+                                  postgresql version: ${{ matrix.postgres }}
+                        
+                        - name: Install poetry
+                          run: |
+                                  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+                        
+                        - name: Install dependencies
+                          run: make local-setup
+                        - name: Provide dotenv file
+                          run: |
+                                  touch .env
+                                  cp .env.example >> .env
+                        - name: Run alembic migration
+                          run: poetry run alembic upgrade head 
+                        - name: Run tests
+                          run: make test
