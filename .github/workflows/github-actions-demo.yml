@@ -42,6 +42,4 @@ jobs:
                         # - name: Install dependencies
                         #   run: make local-setup
                         - name: Run alembic migration
-                          run: poetry run alembic upgrade head 
-                        - name: Run tests
-                          run: make docker-test
+                          run: make docker-migrate

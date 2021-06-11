@@ -40,6 +40,6 @@ docker-run:
 run: 
 	docker run --rm -p 5000:5000 --env-file .env --network="host" --name trackme-back trackme
 
-.PHONY: docker-test
-docker-test:
+.PHONY: docker-migrate
+docker-migrate:
 	docker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head
