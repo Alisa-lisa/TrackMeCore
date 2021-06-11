@@ -25,22 +25,22 @@ jobs:
                 steps:
                         - name: Git checkout 
                           uses: actions/checkout@v2
-
-                        - name: Setting up environment
-                          uses: actions/setup-python@v2
-                          with:
-                                  python-version: ${{ matrix.python }}
-                        
-                        - name: Prepare poetry
-                          uses: abatilo/actions-poetry@v2.0.0
-                          with:
-                                poetry-version: ${{ matrix.poetry }}
-                        - name: Install dependencies
-                          run: make local-setup
                         - name: Provide dotenv file
                           run: |
                                   touch .env
                                   echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
+                        - name: Build container
+                          run: make build 
+                        # - name: Setting up environment
+                        #   uses: actions/setup-python@v2
+                        #   with:
+                        #           python-version: ${{ matrix.python }}
+                        # - name: Prepare poetry
+                        #   uses: abatilo/actions-poetry@v2.0.0
+                        #   with:
+                        #         poetry-version: ${{ matrix.poetry }}
+                        # - name: Install dependencies
+                        #   run: make local-setup
                         - name: Run alembic migration
                           run: poetry run alembic upgrade head 
                         - name: Run tests
