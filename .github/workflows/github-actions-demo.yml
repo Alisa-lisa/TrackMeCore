@@ -41,3 +41,5 @@ jobs:
                           run: make local-setup
                         - name: Run alembic migration
                           run: poetry run alembic upgrade head
+                        - name: Run tests
+                          run: make test
