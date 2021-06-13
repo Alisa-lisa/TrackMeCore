@@ -8,12 +8,11 @@ on:
 jobs:
         integration-tests:
                 name: Integration tests
-                runs-on: ${{ matrix.os }} 
+                runs-on: ubuntu-latest 
                 strategy:
                         matrix:
                                 python: [3.9]
                                 poetry: [1.1.4]
-                                os: [ubuntu-latest]
                 services:
                         postgres:
                                 image: postgres:latest
@@ -47,8 +46,11 @@ jobs:
         build-image:
                 name: Prepare image
                 needs: [integration-tests]
-                runs-on: ubuntu-latest
-                steps:
+                runs-on: ${{ matrix.os }}
+                strategy:
+                        matrix:
+                                os: [ubuntu-latest, macos-latest, macos-11, windows-latest]
+               steps:
                         - name: Set up QEMU
                           uses: docker/setup-qemu-action@v1
                         - name: Set up Docker Buildx
