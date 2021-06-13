@@ -31,16 +31,18 @@ jobs:
                                   echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
                         # - name: Build container
                         #   run: make build 
-                        # - name: Setting up environment
-                        #   uses: actions/setup-python@v2
-                        #   with:
-                        #           python-version: ${{ matrix.python }}
-                        # - name: Prepare poetry
-                        #   uses: abatilo/actions-poetry@v2.0.0
-                        #   with:
-                        #         poetry-version: ${{ matrix.poetry }}
-                        # - name: Install dependencies
-                        #   run: make local-setup
+                        - name: Setting up environment
+                          uses: actions/setup-python@v2
+                          with:
+                                  python-version: ${{ matrix.python }}
+                        - name: Prepare poetry
+                          uses: abatilo/actions-poetry@v2.0.0
+                          with:
+                                poetry-version: ${{ matrix.poetry }}
+                        - name: Install dependencies
+                          run: make local-setup
                         - name: Run alembic migration
-                          run: |
-                                  docker build -t trackme . && docker run --rm --env-file .env --network="host" trackme alembic upgrade head 
+                          run: poetry run alembic upgrade head
+                          # run: |
+                                  # docker build -t trackme . && docker run --rm --env-file .env --network="host" trackme alembic upgrade head 
+
