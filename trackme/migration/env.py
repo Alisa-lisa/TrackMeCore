@@ -19,7 +19,7 @@ import sys
 
 sys.path = ["", ".."] + sys.path[1:]
 
-from trackme.storage import Base, DB_MIGRATION
+from trackme.storage import Base
 
 target_metadata = Base.metadata
 
@@ -41,7 +41,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option(DB_MIGRATION)
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
