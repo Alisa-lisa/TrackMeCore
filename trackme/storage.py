@@ -7,7 +7,7 @@ from trackme.config import Configuration
 
 conf = Configuration()
 
-
+DB_MIGRATION = conf.DB_MIGRATION
 Base = declarative_base()
 engine = create_async_engine(conf.DB_URI)
 async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
