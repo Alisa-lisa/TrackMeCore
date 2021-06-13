@@ -18,8 +18,8 @@ jobs:
                                 image: postgres:latest
                                 env:
                                         POSTGRES_DB: trackme
-                                        POSTGRES_PASSWORD: postgres
-                                        POSTGRES_USER: postgres
+                                        # POSTGRES_PASSWORD: postgres
+                                        # POSTGRES_USER: postgres
                                 ports:
                                         - 5432:5432
                 steps:
