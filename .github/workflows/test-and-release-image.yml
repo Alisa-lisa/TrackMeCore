@@ -63,12 +63,6 @@ jobs:
                           with:
                                   push: true
                                   tags: fatdataunicorn/trackme:latest 
-                        - name: Docker Hub Description
-                          uses: peter-evans/dockerhub-description@v2
-                          env:
-                                  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-                                  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-                                  DOCKERHUB_REPOSITORY: fatdataunicorn/trackme
                         - name: Image digest
                           run: echo ${{ steps.docker_build.outputs.digest }}
                                         
