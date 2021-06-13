@@ -28,7 +28,7 @@ jobs:
                         - name: Provide dotenv file
                           run: |
                                   touch .env
-                                  echo "DB_URI=postgresql+asyncpg://postgres:postgres@postgres:5432/trackme" > .env
+                                  echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
                         - name: Setting up environment
                           uses: actions/setup-python@v2
                           with:
