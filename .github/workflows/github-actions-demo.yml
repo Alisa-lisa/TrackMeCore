@@ -1,0 +1,68 @@
+name: Tracking backend preparation
+
+on:
+        push:
+                branches:
+                        - main
+
+jobs:
+        integration-tests:
+                name: Integration tests
+                runs-on: ubuntu-latest
+                strategy:
+                        matrix:
+                                python: [3.9]
+                                poetry: [1.1.4]
+                services:
+                        postgres:
+                                image: postgres:latest
+                                env:
+                                        POSTGRES_DB: trackme
+                                        POSTGRES_PASSWORD: postgres
+                                        POSTGRES_USER: postgres
+                                ports:
+                                        - 5432:5432
+                steps:
+                        - name: Git checkout 
+                          uses: actions/checkout@v2
+                        - name: Provide dotenv file
+                          run: |
+                                  touch .env
+                                  echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
+                        - name: Setting up environment
+                          uses: actions/setup-python@v2
+                          with:
+                                  python-version: ${{ matrix.python }}
+                        - name: Prepare poetry
+                          uses: abatilo/actions-poetry@v2.0.0
+                          with:
+                                poetry-version: ${{ matrix.poetry }}
+                        - name: Install dependencies
+                          run: make local-setup
+                        - name: Run alembic migration
+                          run: poetry run alembic upgrade head
+                        - name: Run tests
+                          run: make test
+        build-image:
+                name: Prepare image
+                needs: [integration-tests]
+                runs-on: ubuntu-latest
+                steps:
+                        - name: Set up QEMU
+                          uses: docker/setup-qemu-action@v1
+                        - name: Set up Docker Buildx
+                          uses: docker/setup-buildx-action@v1
+                        - name: Login to DockerHub
+                          uses: docker/login-action@v1 
+                          with:
+                                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+                        - name: Build and push
+                          id: docker_build
+                          uses: docker/build-push-action@v2
+                          with:
+                                  push: true
+                                  tags: fatdataunicorn/trackme:latest 
+                        - name: Image digest
+                          run: echo ${{ steps.docker_build.outputs.digest }}
+                                        
