@@ -1,2 +1,2 @@
 #!/bin/bash
-hypercorn -b 0.0.0.0:5000 -w 4 app:app
+hypercorn -b 127.0.0.1:5000 -w 4 app:app
