@@ -43,3 +43,7 @@ run:
 .PHONY: docker-migrate
 docker-migrate:
 	docker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head
+
+
+generate-client:
+	cd openapiclient && openapi-generator-cli generate -i openapi.json -g $(language) --ignore-file-override .

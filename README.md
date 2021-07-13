@@ -31,7 +31,12 @@ GRANT ALL PRIVELEGES ON DATABASE trackme TO root;
 ## Development
 1. run linters: `make linter`
 2. enable pre-commit hook: `pre-commit init` - now on `git commit` all linters will check the code
-
+3. to generate openapi client for this server:
+```
+- save newest opeanpi.json to openapiclient folder
+- run: make generate-client laguage=<deisred_language>
+```
+make sure you have openapi-generator installed. Preferred way of installation is a package with OS specific package manager.
 
 ## Tests
 run: `make test`
