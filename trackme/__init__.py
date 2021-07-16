@@ -2,13 +2,15 @@
 from trackme.tracking.models import *
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from trackme.config import Configuration
 
+conf = Configuration()
 
 def app_factory():
     app = FastAPI(title="TrackMe", description="Core tracking functionality", version="0.0.1")
 
     # TODO: move allowed origins to config
-    origins = ["*"]
+    origins = conf.CORS_ORIGIN.split(',')
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
