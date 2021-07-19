@@ -29,7 +29,7 @@ db-down:
 
 .PHONY: local-run
 local-run:
-	poetry run hypercorn -b 0.0.0.0:5000 -w 1 app:app 	
+	poetry run hypercorn -b 0.0.0.0:5000 --access-logfile - -w 1 app:app --reload
 
 
 .PHONY: build

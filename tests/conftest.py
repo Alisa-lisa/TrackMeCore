@@ -11,10 +11,10 @@ def client():
 
 
 def clean_up(client, user_payload, token):
-    client.delete("/user/delete", json=user_payload, headers={"token": token})
+    client.delete("/user/delete", json=user_payload, headers={"token": token, "access-token": "test"})
 
 
 def user_setup(client, user_payload, skip=False):
     if not skip:
-        client.post("/user/register", json=user_payload)
-    return client.post("/user/auth", json=user_payload).json()
+        client.post("/user/register", json=user_payload, headers={"access-token": "test"})
+    return client.post("/user/auth", json=user_payload, headers={"access-token": "test"}).json()

@@ -11,7 +11,7 @@ def test_add_fast_tracking_entry(client):
 
     entry = [{"topic_id": None, "comment": "some comment", "estimation": 4, "attribute": 1}]
 
-    track = client.post("/track/save", json=entry, headers={"token": token})
+    track = client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})
 
     assert track.status_code == 200
     assert track.json()
@@ -24,7 +24,7 @@ def test_add_story(client):
         {"topic_id": 1, "comment": "mooood", "estimation": 3, "attribute": 1},
     ]
 
-    track = client.post("/track/save", json=entry, headers={"token": token})
+    track = client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})
 
     assert track.status_code == 200
     assert track.json()
@@ -33,38 +33,40 @@ def test_add_story(client):
 def test_malformed_tracking_entry(client):
     token = user_setup(client, USER_PAYLOAD, True)
 
-    track = client.post("/track/save", json=ENTRIES, headers={"token": str(uuid.uuid4())})
+    track = client.post("/track/save", json=ENTRIES, headers={"token": str(uuid.uuid4()), "access-token": "test"})
     assert track.status_code == 404
 
     entry = ENTRIES.copy()
     entry[0]["topic_id"] = 10
-    track2 = client.post("/track/save", json=entry, headers={"token": token})
+    track2 = client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})
     assert not track2.json()
 
 
 def test_filter_and_update_tracking_entry(client):
     token = user_setup(client, USER_PAYLOAD, True)
 
-    entries = client.get("/track/filter?comments=true", headers={"token": token})
+    entries = client.get("/track/filter?comments=true", headers={"token": token, "access-token": "test"})
     assert len(entries.json()) == 3
     entry = entries.json()[0]
 
-    update = client.put("/track/update", headers={"token": token}, json={"id": entry["id"], "comment": "lol"})
+    update = client.put(
+        "/track/update", headers={"token": token, "access-token": "test"}, json={"id": entry["id"], "comment": "lol"}
+    )
     assert update.json()
 
 
 def test_delete_entry(client):
     token = user_setup(client, USER_PAYLOAD, True)
 
-    entries = client.get("/track/filter?comments=true", headers={"token": token})
+    entries = client.get("/track/filter?comments=true", headers={"token": token, "access-token": "test"})
     assert len(entries.json()) == 3
     delete_id = entries.json()[0]["id"]
 
-    deleted = client.delete("/track/delete", json=[delete_id], headers={"token": token})
+    deleted = client.delete("/track/delete", json=[delete_id], headers={"token": token, "access-token": "test"})
 
     assert deleted.status_code == 200
     assert deleted.json()
-    entries = client.get("/track/filter?comments=true", headers={"token": token})
+    entries = client.get("/track/filter?comments=true", headers={"token": token, "access-token": "test"})
     assert len(entries.json()) == 2
 
     clean_up(client, USER_PAYLOAD, token)

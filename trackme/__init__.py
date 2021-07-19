@@ -1,16 +1,20 @@
 """ setup module """
 from trackme.tracking.models import *
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
 from trackme.config import Configuration
+import os
+
 
 conf = Configuration()
+
 
 def app_factory():
     app = FastAPI(title="TrackMe", description="Core tracking functionality", version="0.0.1")
 
     # TODO: move allowed origins to config
-    origins = conf.CORS_ORIGIN.split(',')
+    origins = conf.CORS_ORIGIN.split(",")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
