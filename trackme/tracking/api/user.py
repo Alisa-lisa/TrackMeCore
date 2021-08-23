@@ -22,8 +22,10 @@ async def register_user(input_user: UserInput, access_token: str = Header(...)):
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         status, message = await create_user(input_user)
         if not status:
+            logger.error(message)
             raise HTTPException(status_code=400, detail="Failed to create user")
         return status
+    logger.error("Access token wrong")
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 

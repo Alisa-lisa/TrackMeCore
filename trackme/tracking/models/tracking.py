@@ -9,7 +9,7 @@ class TrackingActivity(Base):
     __tablename__ = "tracking"
 
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
     edit_at = Column(DateTime, nullable=True)
     comment = Column(String, nullable=True)
     estimation = Column(Integer, nullable=False)
