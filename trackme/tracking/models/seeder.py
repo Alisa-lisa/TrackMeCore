@@ -12,9 +12,9 @@ CONSUMPTION - meds, food, etc.
 """
 ATTRITUES = {
     "MENTAL": ["mood", "pain", "anxiety", "joy", "happiness", "excitement", "calmness", "fear", "motivation"],
-    "SOCIAL": ["family", "pet", "friends", "online_communication", "events", "sport"],
-    "PHYSICAL": ["sport", "sleep", "hygine", "meditation", "pain", "walk", "chores"],
-    "CONSUMABLE": ["food", "alcohol", "soft drinks", "water", "coffee", "nicotine", "meds"],
+    "SOCIAL": ["family", "pets", "friends", "online_communication", "events", "sport"],
+    "PHYSICAL": ["sport", "sleep", "hygiene", "meditation", "pain", "walk", "chores"],
+    "CONSUMABLE": ["food", "alcohol", "soft_drinks", "water", "coffee", "nicotine", "meds"],
 }
 """
 Attributes are some activities, events, states that can be associated with a data entry
