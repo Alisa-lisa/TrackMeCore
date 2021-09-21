@@ -12,7 +12,7 @@ CONSUMPTION - meds, food, etc.
 """
 ATTRITUES = {
     "MENTAL": ["mood", "pain", "anxiety", "joy", "happiness", "excitement", "calmness", "fear", "motivation"],
-    "SOCIAL": ["family", "pet", "friends", "online communication", "events", "sport"],
+    "SOCIAL": ["family", "pet", "friends", "online_communication", "events", "sport"],
     "PHYSICAL": ["sport", "sleep", "hygine", "meditation", "pain", "walk", "chores"],
     "CONSUMABLE": ["food", "alcohol", "soft drinks", "water", "coffee", "nicotine", "meds"],
 }
