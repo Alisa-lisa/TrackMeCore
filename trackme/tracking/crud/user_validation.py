@@ -31,7 +31,11 @@ async def check_user(token: str) -> int:
 
 async def _get_user(db: AsyncSession, user: UserInput) -> Optional[UserOutput]:
     try:
-        existing_user = (await db.execute(select(UserModel).where(UserModel.name == user.name))).scalars().first()
+        existing_user = (
+            (await db.execute(select(UserModel).where(UserModel.name == user.name)))
+            .scalars()
+            .first()
+        )
         if existing_user is not None and verify(existing_user.pwhash, user):
             return UserOutput(name=existing_user.name, user_id=existing_user.id)
         else:
@@ -47,19 +51,31 @@ async def get_user(token: str) -> Optional[int]:
 
 
 async def get_user_id_by_token(db: AsyncSession, token: str) -> Optional[int]:
-    user = (await db.execute(select(UserActivityModel).where(UserActivityModel.token == token))).scalars().first()
+    user = (
+        (
+            await db.execute(
+                select(UserActivityModel).where(UserActivityModel.token == token)
+            )
+        )
+        .scalars()
+        .first()
+    )
     return user.user_id if user is not None else None
 
 
 async def _is_valid_name(db: AsyncSession, new_name: str) -> bool:
-    unique_name = (await db.execute(select(UserModel).where(UserModel.name == new_name))).first()
+    unique_name = (
+        await db.execute(select(UserModel).where(UserModel.name == new_name))
+    ).first()
     if unique_name is not None:
         return False
     return True
 
 
 async def _is_email_valid(db: AsyncSession, email: str) -> bool:
-    unique_email = (await db.execute(select(UserModel).where(UserModel.email == email))).first()
+    unique_email = (
+        await db.execute(select(UserModel).where(UserModel.email == email))
+    ).first()
     if unique_email is not None:
         return False
     return True

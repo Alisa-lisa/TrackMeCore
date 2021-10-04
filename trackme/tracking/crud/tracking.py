@@ -38,11 +38,15 @@ async def simple_track(entries: List[TrackingActivityInput], user_id: int) -> bo
             return False
 
 
-async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int) -> Optional[List[EntryModel]]:
+async def _get_entry_by_id(
+    db: AsyncSession, entry_ids: List[int], user_id: int
+) -> Optional[List[EntryModel]]:
     return (
         (
             await db.execute(
-                select(EntryModel).filter(EntryModel.id.in_(entry_ids)).filter(EntryModel.user_id == user_id)
+                select(EntryModel)
+                .filter(EntryModel.id.in_(entry_ids))
+                .filter(EntryModel.user_id == user_id)
             )
         )
         .scalars()
@@ -50,7 +54,9 @@ async def _get_entry_by_id(db: AsyncSession, entry_ids: List[int], user_id: int)
     )
 
 
-async def _prepare_tracking_attribute(db: AsyncSession, entry: EntryModel) -> TrackingActivity:
+async def _prepare_tracking_attribute(
+    db: AsyncSession, entry: EntryModel
+) -> TrackingActivity:
     return TrackingActivity(
         id=entry.id,
         created_at=entry.created_at,
@@ -64,7 +70,11 @@ async def _prepare_tracking_attribute(db: AsyncSession, entry: EntryModel) -> Tr
 
 
 async def edit_entry(
-    user_id: int, entry_id: int, topic: Optional[int], comment: Optional[str], attribute: Optional[int]
+    user_id: int,
+    entry_id: int,
+    topic: Optional[int],
+    comment: Optional[str],
+    attribute: Optional[int],
 ) -> TrackingActivity:
     async with async_session() as db:
         entry = await _get_entry_by_id(db, [entry_id], user_id)
@@ -92,7 +102,11 @@ async def delete_entry(entry_ids: List[int], user_id: int) -> bool:
             entries = await _get_entry_by_id(db, entry_ids, user_id)
             if entries is None:
                 return False
-            await db.execute(delete(EntryModel).where(EntryModel.id.in_(entry_ids), EntryModel.user_id == user_id))
+            await db.execute(
+                delete(EntryModel).where(
+                    EntryModel.id.in_(entry_ids), EntryModel.user_id == user_id
+                )
+            )
             await db.commit()
             return True
         except Exception as ex:
@@ -120,7 +134,9 @@ async def filter_entries(
             if comments:
                 entries_query = entries_query.filter(EntryModel.comment.isnot(None))
             if attribute is not None:
-                entries_query = entries_query.filter(EntryModel.attribute_id == attribute)
+                entries_query = entries_query.filter(
+                    EntryModel.attribute_id == attribute
+                )
             entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
             entries = [
@@ -132,7 +148,9 @@ async def filter_entries(
                     estimation=entry.estimation,
                     topic_id=entry.topic_id,
                     user_id=entry.user_id,
-                    attribute=await _collect_attribute_name_for_entry(db, entry.attribute_id),
+                    attribute=await _collect_attribute_name_for_entry(
+                        db, entry.attribute_id
+                    ),
                 )
                 for entry in entries
             ]

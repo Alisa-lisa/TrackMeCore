@@ -25,6 +25,8 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
     )
+    set_topics(op)
+
     op.create_table(
         "attributes",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -37,9 +39,8 @@ def upgrade():
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-
-    set_topics(op)
     set_default_attributes(op)
+
     # ### end Alembic commands ###
 
 

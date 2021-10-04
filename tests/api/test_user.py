@@ -40,9 +40,13 @@ def test_auth_user(client):
 
 @pytest.mark.skip("wait until update user data is implemented")
 def test_successful_update_user(client):
-    proper_token = client.post("/user/auth", json={"name": "lolol", "password": "123456"}).json()
+    proper_token = client.post(
+        "/user/auth", json={"name": "lolol", "password": "123456"}
+    ).json()
     update_response = client.put(
-        "/user/update", json={"name": "hehehe"}, headers={"token": proper_token, "access-token": "test"}
+        "/user/update",
+        json={"name": "hehehe"},
+        headers={"token": proper_token, "access-token": "test"},
     )
 
     assert update_response.status_code == 200
@@ -52,7 +56,9 @@ def test_successful_update_user(client):
 @pytest.mark.skip("wait until update user data is implemented")
 def test_wrong_user_update(client):
     update_response = client.put(
-        "/user/update", json={"name": "hehehe"}, headers={"token": "sfsdfsfds", "access-token": "test"}
+        "/user/update",
+        json={"name": "hehehe"},
+        headers={"token": "sfsdfsfds", "access-token": "test"},
     )
 
     assert update_response.status_code == 400
@@ -70,7 +76,9 @@ def test_failed_remove_user(client):
 
 def test_successful_remove_user(client):
     proper_token = client.post(
-        "/user/auth", json={"name": "lolol", "password": "123456"}, headers={"access-token": "test"}
+        "/user/auth",
+        json={"name": "lolol", "password": "123456"},
+        headers={"access-token": "test"},
     ).json()
     delete = client.delete(
         "/user/delete",
