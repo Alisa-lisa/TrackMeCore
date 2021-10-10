@@ -18,6 +18,7 @@ class Attribute(BaseModel):
     name: str
     topic_id: int
     user_id: Optional[int]
+    icon_name: Optional[str]
 
 
 class AttributeInput(BaseModel):
