@@ -17,3 +17,4 @@ from .meta import (
     add_attributes,
     delete_attributes,
 )
+from .data_collection import collect_simple_statistics

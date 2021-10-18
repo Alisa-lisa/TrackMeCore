@@ -18,7 +18,7 @@ router = APIRouter()
 @router.get("/topics", response_model=List[Topic])
 async def get_topic_names():
     """
-    Collect main data topics.
+    # Collect main data topics.
     ---
     For now there are 4 hard-coded topics, in the future it will be possible to add custom topics
     """
