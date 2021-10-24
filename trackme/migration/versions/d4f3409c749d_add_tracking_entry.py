@@ -51,9 +51,7 @@ def upgrade():
         sa.ForeignKeyConstraint(["tracking_id"], ["tracking.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_unique_constraint(
-        "unique_combo_idx", "tracking_attributes", ["attribute_id", "tracking_id"]
-    )
+    op.create_unique_constraint("unique_combo_idx", "tracking_attributes", ["attribute_id", "tracking_id"])
 
     # ### end Alembic commands ###
 

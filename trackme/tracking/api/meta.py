@@ -37,7 +37,6 @@ async def get_attributes_names(topic_id: int, token: Optional[str] = Header(None
     ## Returns:
     List of attributes. Minimal list will consist of default attributes for the topic
     """
-    print(f"data is {topic_id}, {token}")
     user_id = None
     if token is not None:
         user_id = await check_user(token)
@@ -45,9 +44,7 @@ async def get_attributes_names(topic_id: int, token: Optional[str] = Header(None
 
 
 @router.post("/attributes", response_model=Optional[Attribute])  # type: ignore
-async def create_custom_attribute(
-    attribute: AttributeInput, access_token: str = Header(...), token: str = Header(...)
-):
+async def create_custom_attribute(attribute: AttributeInput, access_token: str = Header(...), token: str = Header(...)):
     """
     # Create a custom attribute for a specified topic
     ---
@@ -62,15 +59,11 @@ async def create_custom_attribute(
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         user = await check_user(token)
         return await add_attributes(attribute, user)
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 @router.delete("/attributes", response_model=bool)
-async def delete_custom_attribute(
-    attribute_id: int, access_token: str = Header(...), token: str = Header(...)
-):
+async def delete_custom_attribute(attribute_id: int, access_token: str = Header(...), token: str = Header(...)):
     """
     # Delete a custom created attribute
     ---
@@ -84,6 +77,4 @@ async def delete_custom_attribute(
         user = await check_user(token)
         if user is not None:
             return await delete_attributes(attribute_id)
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")

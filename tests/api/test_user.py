@@ -40,9 +40,7 @@ def test_auth_user(client):
 
 @pytest.mark.skip("wait until update user data is implemented")
 def test_successful_update_user(client):
-    proper_token = client.post(
-        "/user/auth", json={"name": "lolol", "password": "123456"}
-    ).json()
+    proper_token = client.post("/user/auth", json={"name": "lolol", "password": "123456"}).json()
     update_response = client.put(
         "/user/update",
         json={"name": "hehehe"},

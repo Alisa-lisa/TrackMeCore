@@ -39,9 +39,7 @@ async def create_user(user: UserInput) -> Tuple[bool, str]:
             return False, f"Error: {ex}"
 
 
-async def auth_user(
-    user: UserInput, client: Optional[str], ip: Optional[str]
-) -> Tuple[Optional[str], str]:
+async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -> Tuple[Optional[str], str]:
     """create new access token or return existing one for existing user"""
     async with async_session() as db:
         verify_user = await _get_user(db, user)
@@ -110,13 +108,7 @@ async def delete_user(user: UserInput, token: str) -> bool:
             # collect user
             user_to_delete_id = await get_user_id_by_token(db, token)
             user_to_delete = (
-                (
-                    await db.execute(
-                        select(UserModel).where(UserModel.id == user_to_delete_id)
-                    )
-                )
-                .scalars()
-                .first()
+                (await db.execute(select(UserModel).where(UserModel.id == user_to_delete_id))).scalars().first()
             )
             # check if name and password are consistent
             is_confirmed = verify(user_to_delete.pwhash, user)

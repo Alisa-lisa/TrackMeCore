@@ -26,9 +26,7 @@ async def register_user(input_user: UserInput, access_token: str = Header(...)):
             raise HTTPException(status_code=400, detail="Failed to create user")
         return status
     logger.error("Access token wrong")
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 @router.post("/auth", response_model=str)
@@ -39,9 +37,7 @@ async def login_user(input_user: UserInput, access_token: str = Header(...)):
         if token is None:
             raise HTTPException(403, message)
         return token
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 # @router.put("/update", response_model=bool)
@@ -64,15 +60,11 @@ async def login_user(input_user: UserInput, access_token: str = Header(...)):
 
 
 @router.delete("/delete", response_model=bool)
-async def remove_user(
-    input_user: UserInput, token: str = Header(None), access_token: str = Header(...)
-):
+async def remove_user(input_user: UserInput, token: str = Header(None), access_token: str = Header(...)):
     """user should be able to delete himself form the platform"""
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         if token is None:
             raise HTTPException(403, "Unknown user")
         # TODO:  use UserInput as confirmation for deletion action
         return await delete_user(input_user, token)
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
