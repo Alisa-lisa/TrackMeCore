@@ -12,9 +12,7 @@ class Topic(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
-    associated_attributes = relationship(
-        "Attribute", backref="topics", cascade="all, delete-orphan", uselist=True
-    )
+    associated_attributes = relationship("Attribute", backref="topics", cascade="all, delete-orphan", uselist=True)
 
 
 # attributes are some activities or events associated with a topic in an entry
@@ -30,6 +28,4 @@ class Attribute(Base):
     # default icons are hardcoded for now in the frontend, but can be changed in the future
     icon_name = Column(String, nullable=True)
 
-    __table_args__ = (
-        UniqueConstraint("user_id", "topic_id", "name", name="unique_attribute"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "topic_id", "name", name="unique_attribute"),)

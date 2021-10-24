@@ -12,10 +12,7 @@ async def does_entry_exist(id: int) -> Optional[int]:
     async with async_session() as db:
         return (
             id
-            if (await db.execute(select(EntryModel).filter(EntryModel.id == id)))
-            .scalars()
-            .first()
-            is not None
+            if (await db.execute(select(EntryModel).filter(EntryModel.id == id))).scalars().first() is not None
             else None
         )
 

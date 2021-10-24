@@ -20,6 +20,7 @@ class TrackingActivityInput(BaseModel):
     comment: Optional[str]
     estimation: int = Field(..., le=5, ge=-5)
     attribute: Optional[int]
+    time: Optional[datetime]
 
 
 class UpdateTrackingActivity(BaseModel):

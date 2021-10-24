@@ -50,9 +50,7 @@ async def collect_filtered_entries(
         user = await check_user(token)
         return await filter_entries(user, topics, start, end, attributes, comments)
 
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 @router.get("/download", response_model=bool)
@@ -83,9 +81,7 @@ async def track(
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         user_id = await check_user(token)
         return await simple_track(data_input, user_id)
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 @router.put("/update", response_model=TrackingActivity)
@@ -115,16 +111,12 @@ async def update_entry(
             data_input.comment,
             data_input.attribute,
         )
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 # DELETE
 @router.delete("/delete", response_model=bool)
-async def delete_entries(
-    entry_ids: List[int], token: str = Header(...), access_token: str = Header(...)
-):
+async def delete_entries(entry_ids: List[int], token: str = Header(...), access_token: str = Header(...)):
     """
     Delete one specific entry by id
     ---
@@ -140,6 +132,4 @@ async def delete_entries(
         user_id = await check_user(token)
         existing_ids = await validate_tracking_ids(entry_ids)
         return await delete_entry(existing_ids, user_id)
-    raise HTTPException(
-        status_code=401, detail="You are not authorized to access this API"
-    )
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")

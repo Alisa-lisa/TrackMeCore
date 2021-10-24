@@ -14,9 +14,7 @@ class TrackingActivity(Base):
     comment = Column(String, nullable=True)
     estimation = Column(Integer, nullable=False)
 
-    topic_id = Column(
-        Integer, ForeignKey("topics.id"), nullable=True
-    )  # missing topic id is fast-track case
+    topic_id = Column(Integer, ForeignKey("topics.id"), nullable=True)  # missing topic id is fast-track case
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     attribute_id = Column(
         Integer,

@@ -30,12 +30,8 @@ def upgrade():
         sa.UniqueConstraint("email"),
         sa.UniqueConstraint("name"),
     )
-    op.create_index(
-        op.f("ix_users_last_active"), "users", ["last_active"], unique=False
-    )
-    op.create_index(
-        op.f("ix_users_registration"), "users", ["registration"], unique=False
-    )
+    op.create_index(op.f("ix_users_last_active"), "users", ["last_active"], unique=False)
+    op.create_index(op.f("ix_users_registration"), "users", ["registration"], unique=False)
     op.create_table(
         "user_activity",
         sa.Column("id", sa.Integer(), nullable=False),

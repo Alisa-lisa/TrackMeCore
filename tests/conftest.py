@@ -20,9 +20,5 @@ def clean_up(client, user_payload, token):
 
 def user_setup(client, user_payload, skip=False):
     if not skip:
-        client.post(
-            "/user/register", json=user_payload, headers={"access-token": "test"}
-        )
-    return client.post(
-        "/user/auth", json=user_payload, headers={"access-token": "test"}
-    ).json()
+        client.post("/user/register", json=user_payload, headers={"access-token": "test"})
+    return client.post("/user/auth", json=user_payload, headers={"access-token": "test"}).json()

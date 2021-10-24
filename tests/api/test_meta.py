@@ -28,9 +28,7 @@ def test_proper_create_attributes(client):
         headers={"token": token, "access-token": "test"},
     )
 
-    default_attributes = client.get(
-        f"/meta/attributes?topic_id={PROPER_ATTRIBUTE['topic_id']}"
-    )
+    default_attributes = client.get(f"/meta/attributes?topic_id={PROPER_ATTRIBUTE['topic_id']}")
     custom_attributes = client.get(
         f"/meta/attributes?topic_id={PROPER_ATTRIBUTE['topic_id']}",
         headers={"token": token, "access-token": "test"},
@@ -47,9 +45,7 @@ def test_proper_delete_attribute(client):
     url = f'/meta/attributes?topic_id={PROPER_ATTRIBUTE["topic_id"]}'
     attributes = client.get(url, headers={"token": token, "access-token": "test"})
 
-    attribute_id = [
-        a["id"] for a in attributes.json() if a["name"] == PROPER_ATTRIBUTE["name"]
-    ][0]
+    attribute_id = [a["id"] for a in attributes.json() if a["name"] == PROPER_ATTRIBUTE["name"]][0]
 
     deleted_attribue = client.delete(
         f"/meta/attributes?attribute_id={attribute_id}",

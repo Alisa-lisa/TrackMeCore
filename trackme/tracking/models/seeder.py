@@ -1,8 +1,4 @@
 """ predefined information to spawn during alembic migration """
-
-from alembic import op
-
-
 TOPICS = ["MENTAL", "PHYSICAL", "SOCIAL", "CONSUMABLE"]
 """
 MENTAL - feelings, emotions, motivation, mood, etc.
@@ -37,7 +33,7 @@ Default values are:
 """
 
 
-def set_topics(connection: op) -> None:
+def set_topics(connection) -> None:
     raw_query = """
     insert into topics(name) values ('{}');
     """
@@ -45,7 +41,7 @@ def set_topics(connection: op) -> None:
         connection.execute(raw_query.format(value))
 
 
-def set_default_attributes(connection: op) -> None:
+def set_default_attributes(connection) -> None:
     """setup default attributes for each of 4 default topics"""
     raw_query = """
     insert into attributes(name, topic_id) values ('{}', {});

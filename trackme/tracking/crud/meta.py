@@ -29,27 +29,19 @@ async def get_attributes(user_id: Optional[int], topic_id: int) -> List[Attribut
         try:
             # collect only default attributes
             attributes_statement = select(AttributeModel).filter(
-                (AttributeModel.topic_id == topic_id)
-                & (AttributeModel.user_id.is_(None))
+                (AttributeModel.topic_id == topic_id) & (AttributeModel.user_id.is_(None))
             )
-            default_attributes = (
-                (await db.execute(attributes_statement)).scalars().all()
-            )
+            default_attributes = (await db.execute(attributes_statement)).scalars().all()
             default = [Attribute.from_orm(a) for a in default_attributes]
 
             # collect purely custom attributes
             custom = []
             if user_id is not None:
                 custom_attributes_query = select(AttributeModel).filter(
-                    (AttributeModel.topic_id == topic_id)
-                    & (AttributeModel.user_id == user_id)
+                    (AttributeModel.topic_id == topic_id) & (AttributeModel.user_id == user_id)
                 )
-                custom_attributes = (
-                    (await db.execute(custom_attributes_query)).scalars().all()
-                )
-                custom = [
-                    Attribute.from_orm(attribute) for attribute in custom_attributes
-                ]
+                custom_attributes = (await db.execute(custom_attributes_query)).scalars().all()
+                custom = [Attribute.from_orm(attribute) for attribute in custom_attributes]
                 default.extend(custom)
             return default
         except Exception as ex:
@@ -58,9 +50,7 @@ async def get_attributes(user_id: Optional[int], topic_id: int) -> List[Attribut
 
 
 # WRITE
-async def add_attributes(
-    attribute: AttributeInput, user_id: int
-) -> Optional[Attribute]:
+async def add_attributes(attribute: AttributeInput, user_id: int) -> Optional[Attribute]:
     """Try to add a new attribute for specific topic and user
     :params attribute: AttributeInput basic information for the new Attribute object
     :returns: Attribute if creation is successful, None otherwise
@@ -105,13 +95,7 @@ async def delete_attributes(attribute_id: int) -> bool:
     async with async_session() as db:
         try:
             attribute_to_delete = (
-                (
-                    await db.execute(
-                        select(AttributeModel).filter(AttributeModel.id == attribute_id)
-                    )
-                )
-                .scalars()
-                .first()
+                (await db.execute(select(AttributeModel).filter(AttributeModel.id == attribute_id))).scalars().first()
             )
             await db.delete(attribute_to_delete)
             await db.commit()

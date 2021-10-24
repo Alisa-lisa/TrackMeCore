@@ -11,9 +11,7 @@ conf = Configuration()
 
 
 def app_factory():
-    app = FastAPI(
-        title="TrackMe", description="Core tracking functionality", version="0.0.1"
-    )
+    app = FastAPI(title="TrackMe", description="Core tracking functionality", version="0.0.1")
 
     # TODO: move allowed origins to config
     origins = conf.CORS_ORIGIN.split(",")
@@ -27,13 +25,9 @@ def app_factory():
     # routes
     from trackme.tracking.api import user_router, tracking_router, meta_router
 
-    app.include_router(
-        meta_router, prefix="/meta", tags=["meta"], dependencies=[], responses={}
-    )
+    app.include_router(meta_router, prefix="/meta", tags=["meta"], dependencies=[], responses={})
 
-    app.include_router(
-        user_router, prefix="/user", tags=["user"], dependencies=[], responses={}
-    )
+    app.include_router(user_router, prefix="/user", tags=["user"], dependencies=[], responses={})
 
     app.include_router(
         tracking_router,
