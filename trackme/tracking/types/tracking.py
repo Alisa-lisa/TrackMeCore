@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import datetime
 
 
@@ -8,7 +8,7 @@ class TrackingActivity(BaseModel):
     created_at: datetime
     edit_at: Optional[datetime]
     comment: Optional[str]
-    estimation: int
+    estimation: Optional[int]
     deleted_at: Optional[datetime]
     topic_id: Optional[int]
     user_id: int
@@ -18,7 +18,7 @@ class TrackingActivity(BaseModel):
 class TrackingActivityInput(BaseModel):
     topic_id: Optional[int]
     comment: Optional[str]
-    estimation: int = Field(..., le=5, ge=-5)
+    estimation: Optional[int]
     attribute: Optional[int]
     time: Optional[datetime]
 
