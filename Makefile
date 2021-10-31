@@ -9,7 +9,7 @@ local-setup:
 lint:
 	poetry run black -l 120 .
 	poetry run flake8 .
-	poetry run mypy . 
+	poetry run mypy --exclude trackme/migration/
 
 .PHONY: test
 test:

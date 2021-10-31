@@ -22,6 +22,7 @@ def test_add_story(client):
     entry = [
         {"topic_id": 1, "comment": "paaaain go", "estimation": -2, "attribute": 2},
         {"topic_id": 1, "comment": "mooood", "estimation": 3, "attribute": 1, "time": "2021-01-01 00:00:00"},
+        {"topic_id": 1, "attribute": 3},
     ]
 
     track = client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})

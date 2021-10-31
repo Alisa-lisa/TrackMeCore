@@ -12,7 +12,7 @@ class TrackingActivity(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     edit_at = Column(DateTime, nullable=True)
     comment = Column(String, nullable=True)
-    estimation = Column(Integer, nullable=False)
+    estimation = Column(Integer, nullable=True)  # can be nullable -> binary feature/class
 
     topic_id = Column(Integer, ForeignKey("topics.id"), nullable=True)  # missing topic id is fast-track case
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
