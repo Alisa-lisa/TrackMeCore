@@ -15,9 +15,9 @@ repos:
           types: [python]
           pass_filenames: false
 
-        - id: mypy
-          name: mypy
-          entry: poetry run mypy --exclude trackme/migration/
-          language: system
-          types: [python]
-          pass_filenames: false
+        # - id: mypy
+        #   name: mypy
+        #   entry: poetry run mypy --exclude trackme/migration/
+        #   language: system
+        #   types: [python]
+        #   pass_filenames: false

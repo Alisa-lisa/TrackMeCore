@@ -6,6 +6,31 @@ from trackme.tracking.crud import check_user, collect_simple_statistics
 
 router = APIRouter()
 
+"""
+Explanation of the return dict
+
+1. Autocorrelation: the situation in which successive values of a variable
+measured over time are correlated with other values of the same series separated
+from them by a specific interval
+
+Meaning: your previous behavior withing given attribute is influenced
+(positively or negatively) by previous X days
+
+2. Trend: general direction where your behavior is heading
+
+3. Seasonality or cyclic behavior - strongly repeated pattern in behavior.
+This is not a bad thing, should be rather used as fact and maybe the goal
+of tracking would be to icnrease or decrease the phase duration
+
+4. Distribution: abstract thing on it's own
+
+4. Stationarity: how stable is your behavior, or did you experience
+fundamental changes in the way you behave. Should have an impact on most decisions about other factors.
+
+5. Modeled behavior: very abstract thing. But basically it is a simplified
+representation of all components together.
+"""
+
 
 @router.get("/analyze", response_model=dict)
 async def simple_statistics(attribute: int, token: str = Header(...), access_token: str = Header(...)):
