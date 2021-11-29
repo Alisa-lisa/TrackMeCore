@@ -1,6 +1,7 @@
 """ computing base statistical information and prepare data for charts """
 from typing import Tuple, List, Optional
-from trackme.tracking.types import DecompositionModels
+
+# from trackme.tracking.types import DecompositionModels
 import numpy as np
 
 # from numpy.polynomial.polynomial import Polynomial
@@ -12,6 +13,20 @@ from collections import deque
 from statsmodels.stats.stattools import durbin_watson
 from statsmodels.tsa.stattools import adfuller
 import matplotlib.pyplot as plt
+
+# import statsmodels
+
+
+def decompose_ts(input_array: List[int]) -> List[float]:
+    """Decomposes given time series into trend and cyclic component
+    via Hodrick-Prescott filter
+    returns (trend)"""
+    hpcycles = sm.tsa.filters.hpfilter(input_array, 1600 * 3 ** 4)
+    # x = [i for i in range(0, len(hpcycles[0]))]
+    # plt.plot(x, hpcycles[0], 'g')
+    # plt.plot(x, hpcycles[1], 'r')
+    # plt.show()
+    return hpcycles[1].tolist()
 
 
 def autocorrelation(row: List[int], max_lag: int = 7, custom_lag: Optional[int] = None) -> dict:
@@ -31,25 +46,36 @@ def autocorrelation(row: List[int], max_lag: int = 7, custom_lag: Optional[int] 
     if custom_lag is not None:
         items.rotate(custom_lag - max_lag)
         res["custom_lag"] = np.corrcoef(row, items)[0, 1]
+
+    # auocor = statsmodels.tsa.stattools.pacf(row, nlags=14, alpha=0.08)
+    # plt.plot([i for i in range(0, len(auocor[0].tolist()))], auocor[0].tolist())
+    # plt.show()
+    # plt.plot([i for i in range(0, len(auocor.pacf))], pacf)
+
+    # plt.show()
+
     return res
 
 
-# TODO: fix this one
 def is_stationary(input_array: List[int], critical_value: Optional[int] = 1) -> bool:
     """
     Augmented Dickey-Fuller unit root test
     https://www.statsmodels.org/dev/generated/statsmodels.tsa.stattools.adfuller.html
     The null hypothesis of the Augmented Dickey-Fuller is that there is a unit root
-    If the statistic is smaller than critical values (the bigger negative number the better) then
-    null hypothesis is rejected and the
+    If the p-value is above critical statistics we can not reject H0
     has unit root -> non-stationary
     no unit root -> stationary
+    Stationary process should have no time-dependent components like trend or seasonality
     """
     dftest = adfuller(input_array, autolag="AIC", regression="ctt")
-    print(f"ADF results {dftest}")
-    print(f"estimation of ADF via p-value: {True if dftest[1] < dftest[4][f'{critical_value}%'] else False}")
     result = True if dftest[1] < dftest[4][f"{critical_value}%"] else False
     return result
+
+
+def simple_trend_detection(input_array: List[int]) -> None:
+    iy = input_array
+    ix = [i for i in range(0, len(input_array))]
+    return np.polyfit(ix, iy, 1)
 
 
 # TODO: I want to choose model parameters automatically
@@ -85,7 +111,9 @@ def ts_decompistion_with_ucm(input_array: List[int]) -> dict:
         return np.polyfit(ix, iy, 1)
 
     intercept_fit = interpretable_estimates(model_fitted.level["filtered"].tolist()[5:])
+    print(f"Intercept fit is {intercept_fit}")
     slope_fit = interpretable_estimates(model_fitted.trend["filtered"].tolist()[5:])
+    print(f"Slope fit is {slope_fit}")
     # SlowingDown, SpeedingUp, Constant -> need some proper estimate, is it individual? Can I deduce it from somewhere?
     slope_interpretation = "Unknown"
     if 0.005 >= slope_fit[0] >= 0.001:
@@ -94,18 +122,6 @@ def ts_decompistion_with_ucm(input_array: List[int]) -> dict:
         slope_interpretation = "SlowingDown"
     else:
         slope_interpretation = "SpeedingUp"
-
-    def cycle_interpretation(input_list: List[float]):
-        """
-        http://en.wikipedia.org/wiki/Fourier_transform
-        """
-        # W = np.fft.fft(input_array)
-        # freq = np.fft.fftfreq(len(input_array), 1)
-
-        plt.plot(input_array)
-        plt.show()
-
-    cycle_interpretation(model_fitted.freq_seasonal["filtered"].tolist()[5:])
 
     # result["cycle"] =
     result["trend"] = "Downward" if intercept_fit[0] < 0 else "Upward"
@@ -125,9 +141,7 @@ def prepare_main_statistics(input_array: List[int]) -> Tuple:
     return mean, mode, median, std, variance
 
 
-def prepare_rows_to_display(
-    input_array: List[int], seasonality: bool = False, model: DecompositionModels = DecompositionModels.ADD
-) -> dict:
+def prepare_rows_to_display(input_array: List[int]) -> dict:
     """Compute rows for: raw data, trend line, seasonality component
     x-axis: value
     y-axis: tick
@@ -135,25 +149,15 @@ def prepare_rows_to_display(
     # preparing np array for trend detection
     res = {}
     res["raw"] = input_array
-    # visual_debug(res)
+    visual_debug(res, debug=True)
     return res
 
 
-def visual_debug(input: dict) -> None:
+def visual_debug(input: dict, debug: bool = False) -> None:
     ts_data = input["raw"]
     plt.plot(ts_data)
-    # autocorrelation
-    # print(sm.graphics.tsa.acf(ts_data, nlags=40))
-    # partial autocorrelation
     # sm.graphics.tsa.plot_acf(ts_data, lags=40)
     # sm.graphics.tsa.plot_pacf(ts_data, lags=40)
-    # additive
-    # result_add = seasonal_decompose(ts_data, model="additive", period=1)
-    # multiplicative - not appropriate for zero and negative numbers -> shift by 1
-    # shifted_ts = [i + 1 for i in ts_data]
-    # result_mult = seasonal_decompose(shifted_ts, model="multiplicative", period=1)
-    # result_add.plot().suptitle('Additive decompose', fontsize=15)
-    # result_mult.plot().suptitle('Multiplicative decompose', fontsize=15)
 
     # UCM
     # assumed local linear trend
@@ -161,14 +165,44 @@ def visual_debug(input: dict) -> None:
     # until I find a sane approach that gives me ok results automatically
     custom_model = {
         "cycle": True,
-        "autoregressive": 1,
+        # "autoregressive": 1,
         "trend": True,
         "level": "local linear deterministic trend",  # depends on trend
     }
+    # custom_model = {
+    #     "cycle": True,
+    #     # "stohastic_cycle": True,
+    #     # "damped_cycle": True,
+    #     "trend": True,
+    #     "level": ""
+    #     # "autoregressive": 1,
+    # }
     model1 = sm.tsa.UnobservedComponents(ts_data, **custom_model)
     res = model1.fit(method="powell", disp=False)
     res.plot_components(legend_loc="lower right")
-    print(res.summary())
 
-    # plt.show()
+    if debug:
+        plt.show()
     return None
+
+
+def distribution_analysis(input_data: List[int], normalized_data: List[int]) -> None:
+    """currently visual analysis -> needs to be automatic later on"""
+    fig, axs = plt.subplots(4)
+    axs[0].plot(input_data)
+
+    # hist_data_density = np.histogram(input_data, bins=10, density=True)
+    # hist_data_samples = np.histogram(input_data, bins=10, density=False)
+    # print(f"histogram density: {hist_data_density}")
+    # print(f"histogram count: {hist_data_samples}")
+    # x = [i for i in range(0, len(input_data))]
+
+    bins = [i for i in range(0, 10)]
+    # plt.plot(bins, hist_data_density[0])
+    axs[1].hist(input_data, bins=bins, density=True)
+
+    # old data
+    axs[2].plot(normalized_data)
+    axs[3].hist(normalized_data, bins=bins, density=True)
+
+    plt.show()
