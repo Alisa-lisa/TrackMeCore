@@ -49,4 +49,5 @@ async def simple_statistics(attribute: int, token: str = Header(...), access_tok
         report = await collect_report(user_id, attribute)
         if not bool(report):
             raise HTTPException(status_code=418, detail="Not enough data collected")
+        return report
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
