@@ -30,7 +30,6 @@ representation of all components together.
 async def simple_statistics(attribute: int, token: str = Header(...), access_token: str = Header(...)):
     """
     # Collect initial analysis to display. Shown information:
-    - Basic parameters: mean, mode, median, standard deviation and variance
     - Raw data points
     - Seasonality row
     - Trend line

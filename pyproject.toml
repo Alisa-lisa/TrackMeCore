@@ -21,6 +21,7 @@ psycopg2-binary = "^2.8.6"
 statsmodels = "^0.13.1"
 numpy = "^1.21.4"
 matplotlib = "^3.5.0"
+ruptures = "^1.1.5"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.12.1"
