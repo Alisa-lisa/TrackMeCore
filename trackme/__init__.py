@@ -23,7 +23,7 @@ def app_factory():
         allow_headers=["*"],
     )
     # routes
-    from trackme.tracking.api import user_router, tracking_router, meta_router
+    from trackme.tracking.api import user_router, tracking_router, meta_router, analytics_router
 
     app.include_router(meta_router, prefix="/meta", tags=["meta"], dependencies=[], responses={})
 
@@ -36,5 +36,7 @@ def app_factory():
         dependencies=[],
         responses={},
     )
+
+    app.include_router(analytics_router, prefix="/analytic", tags=["analytic"], dependencies=[], responses={})
 
     return app

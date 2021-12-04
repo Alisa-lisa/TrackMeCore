@@ -111,7 +111,8 @@ async def filter_entries(
     start: Optional[str],
     end: Optional[str],
     attribute: Optional[int],
-    comments: bool,
+    comments: Optional[bool],
+    ts: bool = False,
 ) -> List[TrackingActivity]:
     async with async_session() as db:
         try:
@@ -122,10 +123,15 @@ async def filter_entries(
                 entries_query = entries_query.filter(EntryModel.created_at >= start)
             if end is not None:
                 entries_query = entries_query.filter(EntryModel.created_at <= end)
-            if comments:
-                entries_query = entries_query.filter(EntryModel.comment.isnot(None))
+            if comments is not None:
+                if comments:
+                    entries_query = entries_query.filter(EntryModel.comment.isnot(None))
+                else:
+                    entries_query = entries_query.filter(EntryModel.comment.is_(None))
             if attribute is not None:
                 entries_query = entries_query.filter(EntryModel.attribute_id == attribute)
+            if ts:
+                entries_query = entries_query.order_by(EntryModel.created_at.asc())
             entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
             entries = [
