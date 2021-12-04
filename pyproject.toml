@@ -20,10 +20,9 @@ argon2-cffi = "^20.1.0"
 psycopg2-binary = "^2.8.6"
 statsmodels = "^0.13.1"
 numpy = "^1.21.4"
-matplotlib = "^3.5.0"
-ruptures = "^1.1.5"
 
 [tool.poetry.dev-dependencies]
+matplotlib = "^3.5.0"
 pre-commit = "^2.12.1"
 pytest = "^6.2.3"
 black = "^21.4b2"
