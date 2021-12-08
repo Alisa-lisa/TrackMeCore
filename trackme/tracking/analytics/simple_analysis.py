@@ -14,7 +14,7 @@ def detect_autocorrelation(input_data: List[int]) -> Tuple[bool, List[float]]:
     d = 2 indicates no autocorrelation, << 2 substantial positive, >> substantial negative
     """
     is_autocor = True if durbin_watson(input_data) != 2 else False
-    auocor = statsmodels.tsa.stattools.pacf(input_data, nlags=14, alpha=0.01)[0].tolist()
+    auocor = statsmodels.tsa.stattools.pacf(input_data, nlags=7, alpha=0.01)[0].tolist()
     return is_autocor, auocor
 
 
@@ -75,12 +75,13 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
     ts_raw = await filter_entries(
         user_id=user_id, topics=None, start=None, end=None, attribute=attribute_id, comments=None, ts=True
     )
-    # (arbitrary number) 2 weeks worth of data can show you some dependencies
-    if len(ts_raw) < 2 * 7:
-        return res
-
     tse = [t.estimation for t in ts_raw if t.estimation is not None]
     tsd = [t.created_at for t in ts_raw if t.created_at is not None]
+
+    # (arbitrary number) 2 weeks worth of data can show you some dependencies
+    if len(tse) < 2 * 7 + 1:
+        return res
+
     trend = detect_trend(tse)
     res["trend"] = [(trend[i], tsd[i]) for i in range(0, len(trend))]
     autocor = detect_autocorrelation(tse)
