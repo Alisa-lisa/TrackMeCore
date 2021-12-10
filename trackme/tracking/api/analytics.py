@@ -30,11 +30,11 @@ representation of all components together.
 async def simple_statistics(attribute: int, token: str = Header(...), access_token: str = Header(...)):
     """
     # Collect initial analysis to display. Shown information:
-    - Raw data points
-    - Seasonality row
+    - Raw statistics if not enought data (<= 15 entries)
+    - Seasonality row (TBD)
     - Trend line
-    - Autocorrelation - not yet implemented, null
-    - Stationarity - bool (this week to previous week) -  not yet implemented, use Dickey-Fuller test
+    - Autocorrelation
+    - Stationarity (TBD)
     ---
     ## Parameters:
     * attribute: int Attribute id to collect information for
@@ -46,7 +46,5 @@ async def simple_statistics(attribute: int, token: str = Header(...), access_tok
         if user_id is None:
             raise HTTPException(status_code=404, detail="Unknown user")
         report = await collect_report(user_id, attribute)
-        if not bool(report):
-            raise HTTPException(status_code=418, detail="Not enough data collected")
         return report
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
