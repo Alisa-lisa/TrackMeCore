@@ -1,6 +1,7 @@
 """ 1st phase of the analysis """
 from typing import List, Tuple
-from trackme.tracking.crud.tracking import filter_entries
+from trackme.tracking.crud.tracking import filter_entries, get_time_horizon
+from trackme.tracking.models.tracking import TrackingActivity as TA
 import statsmodels
 import statsmodels.api as sm
 from statsmodels.stats.stattools import durbin_watson
@@ -67,23 +68,47 @@ def detect_trend(input_data: List[int]) -> List[float]:
 #     # algo = rpt.Binseg(model="l2").fit(np.array(input_data))
 #     result = algo.predict(n_bkps=4)
 #     return result
+DAYS = [0, 1, 2, 3, 4, 5, 6]  # 0 - Monday
+
+
+async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: int) -> dict:
+    """When not there is not enough data to run analysis show:
+    1. structure of estimates - count of entries per day of the week
+    5. time frame for this attribute - earliest date and latest date of the entry
+    """
+    res = {}
+    res["total"] = len(input_data)
+    res["time_structure"] = {i: 0 for i in DAYS}  # type: ignore
+    for i in input_data:
+        weekday = int(i.created_at.weekday())
+        new_value = res["time_structure"][weekday]  # type: ignore
+        res["time_structure"][weekday] = new_value + 1 / len(input_data)  # type: ignore
+    # get earliest date and latest date from crud
+    dates = await get_time_horizon(user_id=user_id, attribute_id=attribute_id)
+    res["start"] = dates[0]
+    res["end"] = dates[1]
+    return res
 
 
 async def collect_report(user_id: int, attribute_id: int) -> dict:
     """detect trend, breaking points"""
-    res = {}  # type: ignore
+    res = {}
+    res["enough_data"] = True
     ts_raw = await filter_entries(
         user_id=user_id, topics=None, start=None, end=None, attribute=attribute_id, comments=None, ts=True
     )
+
     tse = [t.estimation for t in ts_raw if t.estimation is not None]
     tsd = [t.created_at for t in ts_raw if t.created_at is not None]
 
     # (arbitrary number) 2 weeks worth of data can show you some dependencies
     if len(tse) < 2 * 7 + 1:
+        res["enough_data"] = False
+        res["recap"] = await simple_statistics(ts_raw, user_id, attribute_id)  # type: ignore
         return res
 
     trend = detect_trend(tse)
-    res["trend"] = [(trend[i], tsd[i]) for i in range(0, len(trend))]
+    res["trend"] = [(trend[i], tsd[i]) for i in range(0, len(trend))]  # type: ignore
     autocor = detect_autocorrelation(tse)
     res["autocorrelation"] = {
         "is_autocorrelated": autocor[0],

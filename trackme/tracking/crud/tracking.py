@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
@@ -151,3 +151,17 @@ async def filter_entries(
         except Exception as ex:
             logger.error(f"Could not collect entries due to {ex}")
             return []
+
+
+async def get_time_horizon(user_id: int, attribute_id: int) -> list:
+    """get earliest and latest entry dates"""
+    async with async_session() as db:
+        query_start = (
+            select(func.min(EntryModel.created_at))
+            .filter(EntryModel.attribute_id == attribute_id)
+            .filter(EntryModel.user_id == user_id)
+        )
+        start = (await db.execute(query_start)).scalars().one()
+        query_end = select(func.max(EntryModel.created_at)).filter(EntryModel.attribute_id == attribute_id)
+        end = (await db.execute(query_end)).scalars().one()
+        return [start.date() if start is not None else None, end.date() if end is not None else None]
