@@ -103,9 +103,9 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
     tsd = [t.created_at for t in ts_raw if t.created_at is not None]
 
     # (arbitrary number) 2 weeks worth of data can show you some dependencies
+    res["recap"] = await simple_statistics(ts_raw, user_id, attribute_id)  # type: ignore
     if len(tse) < 2 * 7 + 1:
         res["enough_data"] = False
-        res["recap"] = await simple_statistics(ts_raw, user_id, attribute_id)  # type: ignore
         return res
 
     trend = detect_trend(tse)
