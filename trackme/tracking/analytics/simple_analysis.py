@@ -68,7 +68,7 @@ def detect_trend(input_data: List[int]) -> List[float]:
 #     # algo = rpt.Binseg(model="l2").fit(np.array(input_data))
 #     result = algo.predict(n_bkps=4)
 #     return result
-DAYS = [0, 1, 2, 3, 4, 5, 6]  # 0 - Monday
+DAYS = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
 
 
 async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: int) -> dict:
@@ -78,11 +78,12 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
     """
     res = {}
     res["total"] = len(input_data)
-    res["time_structure"] = {i: 0 for i in DAYS}  # type: ignore
+    tmp = {int(i): 0 for i in DAYS.keys()}
     for i in input_data:
         weekday = int(i.created_at.weekday())
-        new_value = res["time_structure"][weekday]  # type: ignore
-        res["time_structure"][weekday] = new_value + 1 / len(input_data)  # type: ignore
+        new_value = tmp[weekday]
+        tmp[weekday] = new_value + 1 / len(input_data)  # type: ignore
+    res["time_structure"] = [[tmp[key], DAYS[key]] for key in tmp.keys()]  # type: ignore
     # get earliest date and latest date from crud
     dates = await get_time_horizon(user_id=user_id, attribute_id=attribute_id)
     res["start"] = dates[0]
