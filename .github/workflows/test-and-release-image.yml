@@ -67,7 +67,7 @@ jobs:
                           uses: docker/build-push-action@v2
                           with:
                                   push: true
-                                  tags: fatdataunicorn/trackme: ${{ matrix.branch }} 
+                                  tags: fatdataunicorn/trackme:${{ matrix.branch }} 
                         - name: Image digest
                           run: echo ${{ steps.docker_build.outputs.digest }}
                                         
