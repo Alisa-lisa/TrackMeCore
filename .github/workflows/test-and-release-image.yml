@@ -4,6 +4,7 @@ on:
         push:
                 branches:
                         - main
+                        - mvp
 
 jobs:
         integration-tests:
@@ -50,6 +51,7 @@ jobs:
                 strategy:
                         matrix:
                                 os: [ubuntu-latest]
+                                branch: [main, tmp]
                 steps:
                         - name: Set up QEMU
                           uses: docker/setup-qemu-action@v1
@@ -65,7 +67,7 @@ jobs:
                           uses: docker/build-push-action@v2
                           with:
                                   push: true
-                                  tags: fatdataunicorn/trackme:latest 
+                                  tags: fatdataunicorn/trackme: ${{ matrix.branch }} 
                         - name: Image digest
                           run: echo ${{ steps.docker_build.outputs.digest }}
                                         
