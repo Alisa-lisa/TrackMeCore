@@ -44,11 +44,6 @@ jobs:
                           run: poetry run alembic upgrade head
                         - name: Run tests
                           run: make test
-        - name: Extract branch name
-          shell: bash
-          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          id: extract_branch
-
         build-image:
                 name: Prepare image
                 needs: [integration-tests]
