@@ -44,6 +44,11 @@ jobs:
                           run: poetry run alembic upgrade head
                         - name: Run tests
                           run: make test
+        - name: Extract branch name
+          shell: bash
+          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          id: extract_branch
+
         build-image:
                 name: Prepare image
                 needs: [integration-tests]
@@ -51,8 +56,11 @@ jobs:
                 strategy:
                         matrix:
                                 os: [ubuntu-latest]
-                                branch: [main, tmp]
                 steps:
+                        - name: extract branch name
+                          shell: bash
+                          run: echo "##[set-output name=branch;]#(echo ${GITHUB_REF#refs/heads/})"
+                          id: branch
                         - name: Set up QEMU
                           uses: docker/setup-qemu-action@v1
                         - name: Set up Docker Buildx
@@ -67,7 +75,7 @@ jobs:
                           uses: docker/build-push-action@v2
                           with:
                                   push: true
-                                  tags: fatdataunicorn/trackme:${{ matrix.branch }} 
+                                  tags: fatdataunicorn/trackme:${{ steps.extract_branch.outputs.branch }}
                         - name: Image digest
                           run: echo ${{ steps.docker_build.outputs.digest }}
                                         
