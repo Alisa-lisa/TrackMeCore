@@ -1,4 +1,5 @@
 # TrackMeCore
+Main is an experimental branch with more analysis and some BE features, that are not yet on stable
 Back-end functionality to collect personal data and run initial analysis
 this is the back-end part of the app to track different aspects of the personal life 
 and identify some useful patterns, correlations and trends to better adjust habits, routines and such
