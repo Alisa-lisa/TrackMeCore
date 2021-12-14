@@ -54,7 +54,7 @@ jobs:
                 steps:
                         - name: extract branch name
                           shell: bash
-                          run: echo "##[set-output name=branch;]#(echo ${GITHUB_REF#refs/heads/})"
+                          run: echo "##[set-output name=branchName;]#(echo ${GITHUB_REF#refs/heads/})"
                           id: branch
                         - name: Set up QEMU
                           uses: docker/setup-qemu-action@v1
@@ -72,5 +72,5 @@ jobs:
                                   push: true
                                   tags: fatdataunicorn/trackme:${{ steps.extract_branch.outputs.branch }}
                         - name: Image digest
-                          run: echo ${{ steps.docker_build.outputs.digest }}
+                          run: echo ${{ steps.branch.outputs.branchName }}
                                         
