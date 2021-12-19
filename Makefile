@@ -33,7 +33,7 @@ local-run:
 
 
 .PHONY: build
-docker-run:
+build:
 	docker build --rm -t trackme . 
 
 .PHONY: run
