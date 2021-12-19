@@ -11,8 +11,8 @@ jobs:
                 runs-on: ubuntu-latest 
                 strategy:
                         matrix:
-                                python: [3.9]
-                                poetry: [1.1.4]
+                                python: [3.10]
+                                poetry: [1.1.12]
                 services:
                         postgres:
                                 image: postgres:latest
@@ -65,7 +65,7 @@ jobs:
                           uses: docker/build-push-action@v2
                           with:
                                   push: true
-                                  tags: fatdataunicorn/trackme:latest 
+                                  tags: fatdataunicorn/trackme:experimental 
                         - name: Image digest
                           run: echo ${{ steps.docker_build.outputs.digest }}
                                         

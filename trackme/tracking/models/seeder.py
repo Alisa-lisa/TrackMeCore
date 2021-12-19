@@ -7,29 +7,19 @@ SOCIAL - connections and social events like "talked to mom", 1:1 with my boss
 CONSUMPTION - meds, food, etc.
 """
 ATTRITUES = {
-    "MENTAL": [
-        "mood",
-        "pain",
-        "anxiety",
-        "joy",
-        "happy",
-        "excitement",
-        "calm",
-        "fear",
-        "motivation",
-    ],
-    "SOCIAL": ["family", "pets", "friends", "online", "irl", "sport"],
-    "PHYSICAL": ["sport", "sleep", "hygiene", "meditation", "pain", "walk", "chores"],
-    "CONSUMABLE": ["food", "alcohol", "drinks", "water", "coffee", "nicotine", "meds"],
+    "MENTAL": ["mood", "stress", "motivation"],
+    "SOCIAL": ["family", "friends", "work"],
+    "PHYSICAL": ["sport", "sleep", "meditation"],
+    "CONSUMABLE": ["alcohol", "water", "coffee", "smoking", "meds"],
 }
 """
 Attributes are some activities, events, states that can be associated with a data entry
 and estimate as an additional information
 Default values are:
-    Mental: mood, anxiety, happiness, love, emotions (similar to fast track - emotional mix)
-    Physical: activity, sport, pain, sleep
-    Social: family, friends, partner, pets
-    Consumable: food, alcohol, meds, tobacco, drinks
+    Mental: mood, stress, motivation
+    Physical: family, friends, work
+    Social: sport, sleep, meditation
+    Consumable: alcohol, water, coffee, smoking, meds
 """
 
 

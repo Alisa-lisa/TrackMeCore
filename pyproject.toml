@@ -6,7 +6,7 @@ authors = ["alisa <alisa.dammer@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.10,<3.11"
 fastapi = "^0.65.0"
 SQLAlchemy = "^1.4.5"
 alembic = "^1.5.8"
