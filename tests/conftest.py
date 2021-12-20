@@ -6,8 +6,8 @@ import pytest
 # TODO: os dependent .env files?
 @pytest.fixture(scope="session")
 def client():
-    app = app_factory()
-    return TestClient(app)
+    with TestClient(app_factory()) as client:
+        yield client
 
 
 def clean_up(client, user_payload, token):

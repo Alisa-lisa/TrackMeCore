@@ -65,6 +65,5 @@ async def remove_user(input_user: UserInput, token: str = Header(None), access_t
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         if token is None:
             raise HTTPException(403, "Unknown user")
-        # TODO:  use UserInput as confirmation for deletion action
         return await delete_user(input_user, token)
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
