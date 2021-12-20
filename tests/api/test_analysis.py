@@ -7,7 +7,7 @@ USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"
 def test_add_fast_tracking_entry(client):
     token = user_setup(client, USER_PAYLOAD)
 
-    attribute = 23
+    attribute = 13
     # setup one tracking entry
     entry = [{"topic_id": 1, "comment": "some comment", "estimation": 4, "attribute": attribute}]
     client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})

@@ -1,7 +1,7 @@
 from ..conftest import clean_up, user_setup
 
 USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"}
-PROPER_ATTRIBUTE = {"topic_id": 2, "name": "fatigue", "icon_name": "lol"}
+PROPER_ATTRIBUTE = {"topic_id": 2, "name": "sport", "icon_name": "lol"}
 
 
 def test_topics(client):
@@ -15,7 +15,7 @@ def test_attributes(client):
     response = client.get("/meta/attributes?topic_id=1")
 
     assert response.status_code == 200
-    assert len(response.json()) >= 9
+    assert len(response.json()) >= 3
 
 
 def test_proper_create_attributes(client):
@@ -35,7 +35,7 @@ def test_proper_create_attributes(client):
     )
 
     assert track.status_code == 200
-    assert track.json()["name"] == "fatigue"
+    assert track.json()["name"] == "sport"
 
     assert len(default_attributes.json()) < len(custom_attributes.json())
 
