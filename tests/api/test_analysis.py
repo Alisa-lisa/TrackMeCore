@@ -4,12 +4,12 @@ from ..conftest import clean_up, user_setup
 USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"}
 
 
-def test_add_fast_tracking_entry(client):
+def test_(client):
     token = user_setup(client, USER_PAYLOAD)
 
     attribute = 13
     # setup one tracking entry
-    entry = [{"topic_id": 1, "comment": "some comment", "estimation": 4, "attribute": attribute}]
+    entry = [{"topic_id": 1, "comment": "some comment", "estimation": 4, "attribute": attribute, "time": "2021-12-21 12:44:52"}]
     client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})
 
     report = client.get(f"/analytic/analyze?attribute={attribute}", headers={"token": token, "access-token": "test"})
@@ -17,6 +17,8 @@ def test_add_fast_tracking_entry(client):
     assert report.status_code == 200
     assert not report.json()["enough_data"]
     assert report.json()["recap"]["total"] > 0
+    assert report.json()["recap"]["time_structure"][1]["count"] > 0
+    assert report.json()["recap"]["time_structure"][1]["min"] > 0
     assert report.json()["recap"]["start"] == report.json()["recap"]["end"]
 
     report_missing = client.get("/analytic/analyze?attribute=0", headers={"token": token, "access-token": "test"})
