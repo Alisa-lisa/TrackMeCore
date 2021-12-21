@@ -5,6 +5,7 @@ from trackme.tracking.models.tracking import TrackingActivity as TA
 import statsmodels
 import statsmodels.api as sm
 from statsmodels.stats.stattools import durbin_watson
+import numpy as np
 
 
 def detect_autocorrelation(input_data: List[int]) -> Tuple[bool, List[float]]:
@@ -76,6 +77,16 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
     1. structure of estimates - count of entries per day of the week
     5. time frame for this attribute - earliest date and latest date of the entry
     """
+    def base_stats(key: int) -> Tuple[float, float, float]:
+        """ get min, max and avg for weekday """
+        array = []
+        for item in input_data:
+            if item.created_at.weekday() == key:
+                array.append(item.estimation)
+        if bool(array):
+            return (min(array), max(array), np.mean(array))
+        return (0,0,0)
+
     res = {}
     res["total"] = len(input_data)
     tmp = {int(i): 0 for i in DAYS.keys()}
@@ -83,7 +94,11 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
         weekday = int(i.created_at.weekday())
         new_value = tmp[weekday]
         tmp[weekday] = new_value + 1 / len(input_data)  # type: ignore
-    res["time_structure"] = [[tmp[key], DAYS[key]] for key in tmp.keys()]  # type: ignore
+    res["time_structure"] = []
+    for key in tmp.keys():
+        base = base_stats(key)
+        res["time_structure"].append({"count": tmp[key], "min": base[0], 
+            "max": base[1], "avg": base[2], "day": DAYS[key]})   # type: ignore
     # get earliest date and latest date from crud
     dates = await get_time_horizon(user_id=user_id, attribute_id=attribute_id)
     res["start"] = dates[0]
