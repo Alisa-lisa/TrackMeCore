@@ -14,6 +14,7 @@ def test_(client):
 
     report = client.get(f"/analytic/analyze?attribute={attribute}", headers={"token": token, "access-token": "test"})
 
+    # simple feature with estimation
     assert report.status_code == 200
     assert not report.json()["enough_data"]
     assert report.json()["recap"]["total"] > 0
@@ -25,6 +26,17 @@ def test_(client):
 
     assert report_missing.status_code == 200
     assert report_missing.json()["recap"]["total"] == 0
+
+    # binary feature
+    binary_attribute = 6  # meditations as a default param
+    entry = [{"topic_id": 2, "attribute": binary_attribute}]
+    client.post("/track/save", json=entry, headers={"token": token, "access-token": "test"})
+
+    report = client.get(f"/analytic/analyze?attribute={binary_attribute}", headers={"token": token, "access-token": "test"})
+
+    # simple feature with estimation
+    assert report.status_code == 200
+    assert "min" not in report.json()["recap"]["time_structure"][1].keys()
 
     # TODO: big trend test
     # special_attribute = 4

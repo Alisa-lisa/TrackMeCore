@@ -89,6 +89,7 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
 
     res = {}
     res["total"] = len(input_data)
+    binary = True if all(i.estimation for i in input_data) else False
     tmp = {int(i): 0 for i in DAYS.keys()}
     for i in input_data:
         weekday = int(i.created_at.weekday())
@@ -96,9 +97,12 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
         tmp[weekday] = new_value + 1  # type: ignore
     res["time_structure"] = []
     for key in tmp.keys():
-        base = base_stats(key)
-        res["time_structure"].append({"count": tmp[key], "min": base[0], 
-            "max": base[1], "avg": base[2], "day": DAYS[key]})   # type: ignore
+        if binary:
+            base = base_stats(key)
+            res["time_structure"].append({"count": tmp[key], "min": base[0], 
+                "max": base[1], "avg": base[2], "day": DAYS[key]})   # type: ignore
+        else:
+            res["time_structure"].append({"count": tmp[key], "day": DAYS[key]})
     # get earliest date and latest date from crud
     dates = await get_time_horizon(user_id=user_id, attribute_id=attribute_id)
     res["start"] = dates[0]
