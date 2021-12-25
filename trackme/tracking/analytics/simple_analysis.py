@@ -93,7 +93,7 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
     for i in input_data:
         weekday = int(i.created_at.weekday())
         new_value = tmp[weekday]
-        tmp[weekday] = new_value + 1 / len(input_data)  # type: ignore
+        tmp[weekday] = new_value + 1  # type: ignore
     res["time_structure"] = []
     for key in tmp.keys():
         base = base_stats(key)
