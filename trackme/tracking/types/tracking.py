@@ -24,14 +24,15 @@ class TrackingActivityInput(BaseModel):
     time: Optional[datetime]
 
     class Config:
-       schema_extra = {"example":{
-            "topic_id": 1,
-            "comment": "neutral mood",
-            "estimation": 5,
-            "attribute": 1,
-            "time": "2021-12-21 12:44:52"
-          }
-        } 
+        schema_extra = {
+            "example": {
+                "topic_id": 1,
+                "comment": "neutral mood",
+                "estimation": 5,
+                "attribute": 1,
+                "time": "2021-12-21 12:44:52",
+            }
+        }
 
 
 class UpdateTrackingActivity(BaseModel):
