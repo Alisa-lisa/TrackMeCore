@@ -1,6 +1,7 @@
 """ 1st phase of the analysis """
+from trackme.tracking.analytics.multifactor_analysis import pearson_correlation
 from typing import List, Tuple
-from trackme.tracking.crud.tracking import filter_entries, get_time_horizon
+from trackme.tracking.crud.tracking import filter_entries, get_time_horizon, collect_attributes_ids
 from trackme.tracking.models.tracking import TrackingActivity as TA
 import statsmodels
 import statsmodels.api as sm
@@ -77,15 +78,16 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
     1. structure of estimates - count of entries per day of the week
     5. time frame for this attribute - earliest date and latest date of the entry
     """
+
     def base_stats(key: int) -> Tuple[float, float, float]:
-        """ get min, max and avg for weekday """
+        """get min, max and avg for weekday"""
         array = []
         for item in input_data:
             if item.created_at.weekday() == key:
                 array.append(item.estimation)
         if bool(array):
             return (min(array), max(array), np.mean(array))
-        return (0,0,0)
+        return (0, 0, 0)
 
     res = {}
     res["total"] = len(input_data)
@@ -94,15 +96,16 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
     for i in input_data:
         weekday = int(i.created_at.weekday())
         new_value = tmp[weekday]
-        tmp[weekday] = new_value + 1  # type: ignore
-    res["time_structure"] = []
+        tmp[weekday] = new_value + 1
+    # This probably requires more memory due to duplicate objects stats and later clone
+    stats = []
     for key in tmp.keys():
         if binary:
             base = base_stats(key)
-            res["time_structure"].append({"count": tmp[key], "min": base[0], 
-                "max": base[1], "avg": base[2], "day": DAYS[key]})   # type: ignore
+            stats.append({"count": tmp[key], "min": base[0], "max": base[1], "avg": base[2], "day": DAYS[key]})
         else:
-            res["time_structure"].append({"count": tmp[key], "day": DAYS[key]})
+            stats.append({"count": tmp[key], "day": DAYS[key]})
+    res["time_structure"] = stats  # type: ignore
     # get earliest date and latest date from crud
     dates = await get_time_horizon(user_id=user_id, attribute_id=attribute_id)
     res["start"] = dates[0]
@@ -134,5 +137,20 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
         "is_autocorrelated": autocor[0],
         "autocorrelaton_estimates": autocor[1][1:8],
     }  # type: ignore
+
+    # multiple correlations
+    res["multifactor"] = {}  # type: ignore
+    # attribute_id is the factor_one, where all others if not binary are other factors
+    other_factors = await collect_attributes_ids(user_id, binary=False)
+    # main factor should also be non-binary
+    if attribute_id not in other_factors:
+        return res
+    other_factors.remove(attribute_id)
+    res["multifactor"]["pearson"] = []  # type: ignore
+    for factor in other_factors:
+        raw_second = await filter_entries(
+            user_id=user_id, topics=None, start=None, end=None, attribute=factor, comments=None, ts=True
+        )
+        res["multifactor"]["pearson"].append({factor: pearson_correlation(ts_raw, raw_second)})  # type: ignore
 
     return res

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, distinct
 from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
@@ -165,3 +165,17 @@ async def get_time_horizon(user_id: int, attribute_id: int) -> list:
         query_end = select(func.max(EntryModel.created_at)).filter(EntryModel.attribute_id == attribute_id)
         end = (await db.execute(query_end)).scalars().one()
         return [start.date() if start is not None else None, end.date() if end is not None else None]
+
+
+async def collect_attributes_ids(user_id: int, binary: bool = False) -> List[int]:
+    """Collect all attributes with not-missing estimations"""
+    async with async_session() as db:
+        try:
+            attributes_query = select(distinct(EntryModel.attribute_id)).filter(EntryModel.user_id == user_id)
+            if not binary:
+                attributes_query = attributes_query.filter(EntryModel.estimation.isnot(None))
+            attributes = (await db.execute(attributes_query)).scalars().all()
+            return attributes
+        except Exception as ex:
+            logger.error(f"Could not collect non-binary attributes for user {user_id} due to {ex}")
+            return []
