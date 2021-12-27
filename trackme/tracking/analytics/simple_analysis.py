@@ -91,7 +91,8 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
 
     res = {}
     res["total"] = len(input_data)
-    binary = True if all(i.estimation for i in input_data) else False
+    estimations = [i.estimation for i in input_data if i.estimation is not None]
+    binary = False if len(estimations) > 0 else True
     tmp = {int(i): 0 for i in DAYS.keys()}
     for i in input_data:
         weekday = int(i.created_at.weekday())
@@ -100,7 +101,7 @@ async def simple_statistics(input_data: List[TA], user_id: int, attribute_id: in
     # This probably requires more memory due to duplicate objects stats and later clone
     stats = []
     for key in tmp.keys():
-        if binary:
+        if not binary:
             base = base_stats(key)
             stats.append({"count": tmp[key], "min": base[0], "max": base[1], "avg": base[2], "day": DAYS[key]})
         else:
