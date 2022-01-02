@@ -25,7 +25,11 @@ def pearson_correlation(first_factor: List[TA], second_factor: List[TA]) -> Opti
     # should be done via sql ideally
 
     def _avg_estimation(date, array: List[TA]) -> int:
-        return int(np.mean([item.estimation for item in array if item.created_at.date() == date]))  # type: ignore
+        return int(
+            np.mean(
+                [item.estimation for item in array if (item.created_at.date() == date and item.estimation is not None)]
+            )
+        )
 
     factor_one = []
     factor_two = []
