@@ -168,7 +168,9 @@ async def get_time_horizon(user_id: int, attribute_id: int) -> list:
 
 
 async def collect_attributes_ids(user_id: int, binary: bool = False) -> List[int]:
-    """Collect all attributes with not-missing estimations"""
+    """Collect all attributes with not-missing estimations
+    for now: a factor is binary if there are entries without estimation
+    """
     async with async_session() as db:
         try:
             attributes_query = select(distinct(EntryModel.attribute_id)).filter(EntryModel.user_id == user_id)

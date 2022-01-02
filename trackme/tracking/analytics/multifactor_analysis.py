@@ -24,18 +24,21 @@ def pearson_correlation(first_factor: List[TA], second_factor: List[TA]) -> Opti
     # take average if there are multiple entries for the same day
     # should be done via sql ideally
 
-    def _avg_estimation(date, array: List[TA]) -> int:
-        return int(
-            np.mean(
-                [item.estimation for item in array if (item.created_at.date() == date and item.estimation is not None)]
-            )
-        )
+    def _avg_estimation(date, array: List[TA]) -> Optional[int]:
+        estimations = [
+            item.estimation for item in array if (item.created_at.date() == date and item.estimation is not None)
+        ]
+        if len(estimations) < 1:
+            return None
+        return int(np.mean(estimations))
 
     factor_one = []
     factor_two = []
     for date in effective_dates:
-        factor_one.append(_avg_estimation(date, first_factor))
-        factor_two.append(_avg_estimation(date, second_factor))
+        daily_estimate = _avg_estimation(date, second_factor)
+        if daily_estimate is not None:
+            factor_two.append(daily_estimate)
+            factor_one.append(_avg_estimation(date, first_factor))
 
     assert len(factor_one) == len(factor_two)
     # an arbitrary number for comparison of rows: a pattern can be seen after at least 2 weeks

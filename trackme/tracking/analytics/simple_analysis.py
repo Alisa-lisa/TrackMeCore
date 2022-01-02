@@ -149,6 +149,7 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
     other_factors.remove(attribute_id)
     res["multifactor"]["pearson"] = []  # type: ignore
     for factor in other_factors:
+        print(f"working with factor {factor}")
         raw_second = await filter_entries(
             user_id=user_id, topics=None, start=None, end=None, attribute=factor, comments=None, ts=True
         )
