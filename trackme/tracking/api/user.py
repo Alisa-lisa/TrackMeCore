@@ -7,6 +7,7 @@ from trackme.tracking.crud import (
     create_user,
     auth_user,
     delete_user,
+    get_user,
 )
 from fastapi.logger import logger
 import logging
@@ -37,6 +38,16 @@ async def login_user(input_user: UserInput, access_token: str = Header(...)):
         if token is None:
             raise HTTPException(403, message)
         return token
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
+
+
+@router.get("/validate", response_model=bool)
+async def validate_user(access_token: str = Header(...), token: str = Header(...)):
+    """helper validator"""
+    if access_token is not None and access_token == conf.ACCESS_TOKEN:
+        is_valid = await get_user(token)
+        result = True if is_valid is not None else False
+        return result
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 

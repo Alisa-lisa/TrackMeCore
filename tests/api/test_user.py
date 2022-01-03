@@ -1,4 +1,5 @@
 import pytest
+import uuid
 
 
 def test_add_user(client):
@@ -36,6 +37,13 @@ def test_auth_user(client):
         headers={"access-token": "test"},
     )
     assert failed_auth1.status_code == 403
+
+
+def test_no_such_user(client):
+    wrong_token = str(uuid.uuid4())
+    is_real_user = client.get("/user/validate", headers={"access-token": "test", "token": wrong_token})
+
+    assert not is_real_user.json()
 
 
 @pytest.mark.skip("wait until update user data is implemented")
