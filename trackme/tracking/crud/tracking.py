@@ -18,6 +18,7 @@ from fastapi.logger import logger
 
 async def simple_track(entries: List[TrackingActivityInput], user_id: int) -> bool:
     async with async_session() as db:
+        logger.error(f"tracking entry has tag {entries[0].balance_tag}")
         try:
             # TODO: validate attribute ids
             trackings = [
@@ -28,6 +29,7 @@ async def simple_track(entries: List[TrackingActivityInput], user_id: int) -> bo
                     user_id=user_id,
                     attribute_id=entry.attribute,
                     created_at=entry.time if entry.time is not None else None,
+                    balance_tag=entry.balance_tag if entry.balance_tag is not None else None,
                 )
                 for entry in entries
             ]
@@ -144,6 +146,7 @@ async def filter_entries(
                     topic_id=entry.topic_id,
                     user_id=entry.user_id,
                     attribute=await _collect_attribute_name_for_entry(db, entry.attribute_id),
+                    balance_tag=entry.balance_tag,
                 )
                 for entry in entries
             ]
