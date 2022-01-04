@@ -1,5 +1,6 @@
 import uuid
 from ..conftest import clean_up, user_setup
+from trackme.tracking.types.tracking import MentalBalanceTagEnum as mne
 
 
 USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"}
@@ -20,7 +21,7 @@ def test_add_fast_tracking_entry(client):
 def test_add_story(client):
     token = user_setup(client, USER_PAYLOAD, True)
     entry = [
-        {"topic_id": 1, "comment": "paaaain go", "estimation": -2, "attribute": 2},
+        {"topic_id": 1, "comment": "paaaain", "estimation": 2, "attribute": 2, "balance_tag": "fun"},
         {"topic_id": 1, "comment": "mooood", "estimation": 3, "attribute": 1, "time": "2021-01-01 00:00:00"},
         {"topic_id": 1, "attribute": 3},
     ]
@@ -51,7 +52,13 @@ def test_filter_and_update_tracking_entry(client):
     token = user_setup(client, USER_PAYLOAD, True)
 
     entries = client.get("/track/filter?comments=true", headers={"token": token, "access-token": "test"})
+
     assert len(entries.json()) == 3
+
+    entries_body = entries.json()
+    assert entries_body[0]["balance_tag"] is not None
+    assert entries_body[0]["balance_tag"] == mne.fun
+
     entry = entries.json()[0]
     diff_time = [e for e in entries.json() if e["comment"] == "mooood"][0]
     assert entry["created_at"] != diff_time["created_at"]

@@ -1,6 +1,14 @@
 from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
+from enum import Enum
+
+
+class MentalBalanceTagEnum(str, Enum):
+    chores = "chores"
+    social = "social"
+    fun = "fun"
+    mastery = "mastery"
 
 
 class TrackingActivity(BaseModel):
@@ -13,6 +21,7 @@ class TrackingActivity(BaseModel):
     topic_id: Optional[int]
     user_id: int
     attribute: str
+    balance_tag: Optional[MentalBalanceTagEnum]
 
 
 class TrackingActivityInput(BaseModel):
@@ -22,6 +31,7 @@ class TrackingActivityInput(BaseModel):
     attribute: Optional[int]
     # TODO: validate datetime format
     time: Optional[datetime]
+    balance_tag: Optional[MentalBalanceTagEnum]
 
     class Config:
         schema_extra = {
@@ -31,6 +41,7 @@ class TrackingActivityInput(BaseModel):
                 "estimation": 5,
                 "attribute": 1,
                 "time": "2021-12-21 12:44:52",
+                "balance_tag": "mastery",
             }
         }
 
