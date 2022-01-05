@@ -1,7 +1,8 @@
 """ 1st phase of the analysis """
-from trackme.tracking.analytics.multifactor_analysis import pearson_correlation
+from trackme.tracking.analytics.multifactor_analysis import pearson_correlation, pointbiserial_correlation
 from typing import List, Tuple
 from trackme.tracking.crud.tracking import filter_entries, get_time_horizon, collect_attributes_ids
+from trackme.tracking.crud.tracking_validation import is_attribute_binary
 from trackme.tracking.models.tracking import TrackingActivity as TA
 import statsmodels
 import statsmodels.api as sm
@@ -141,17 +142,33 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
 
     # multiple correlations
     res["multifactor"] = {}  # type: ignore
-    # attribute_id is the factor_one, where all others if not binary are other factors
-    other_factors = await collect_attributes_ids(user_id, binary=False)
-    # main factor should also be non-binary
-    if attribute_id not in other_factors:
+    is_main_factor_binary = await is_attribute_binary(attribute_id, user_id)
+    if not is_main_factor_binary:
+        res["multifactor"]["pearson"] = []  # type: ignore
+        # continuous_factor vs continuous_factors correlation
+        continuous_factors = await collect_attributes_ids(user_id, binary=False)
+        for a in continuous_factors:
+            is_binary = await is_attribute_binary(a, user_id)
+            if is_binary:
+                continuous_factors.remove(a)
+        continuous_factors.remove(attribute_id)
+        for factor in continuous_factors:
+            raw_second = await filter_entries(
+                user_id=user_id, topics=None, start=None, end=None, attribute=factor, comments=None, ts=True
+            )
+            res["multifactor"]["pearson"].append({factor: pearson_correlation(ts_raw, raw_second)})  # type: ignore
+
+        # continuous_factor vs binary_factors correlation
+        res["multifactor"]["pbsr"] = []  # type: ignore
+        binary_factors = await collect_attributes_ids(user_id, binary=True)
+        for factor in binary_factors:
+            raw_second = await filter_entries(
+                user_id=user_id, topics=None, start=None, end=None, attribute=factor, comments=None, ts=True
+            )
+            res["multifactor"]["pbsr"].append({factor: pointbiserial_correlation(ts_raw, raw_second)})  # type: ignore
+
+    # binary_factors vs binary_factors correlation: TBI
+    else:
         return res
-    other_factors.remove(attribute_id)
-    res["multifactor"]["pearson"] = []  # type: ignore
-    for factor in other_factors:
-        raw_second = await filter_entries(
-            user_id=user_id, topics=None, start=None, end=None, attribute=factor, comments=None, ts=True
-        )
-        res["multifactor"]["pearson"].append({factor: pearson_correlation(ts_raw, raw_second)})  # type: ignore
 
     return res

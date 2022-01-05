@@ -170,15 +170,21 @@ async def get_time_horizon(user_id: int, attribute_id: int) -> list:
         return [start.date() if start is not None else None, end.date() if end is not None else None]
 
 
+# TODO: stricter definition of binary and non-binary attributes
+# define what it means for binary to have an estimation
+# define what it means for continuous not to have an estimation
 async def collect_attributes_ids(user_id: int, binary: bool = False) -> List[int]:
-    """Collect all attributes with not-missing estimations
-    for now: a factor is binary if there are entries without estimation
+    """Collect all attribute's ids binary or continuous
+    binary attribute - all estimations are not set
+    continuous attribute - all entries have estimations
     """
     async with async_session() as db:
         try:
             attributes_query = select(distinct(EntryModel.attribute_id)).filter(EntryModel.user_id == user_id)
             if not binary:
                 attributes_query = attributes_query.filter(EntryModel.estimation.isnot(None))
+            else:
+                attributes_query = attributes_query.filter(EntryModel.estimation.is_(None))
             attributes = (await db.execute(attributes_query)).scalars().all()
             return attributes
         except Exception as ex:
