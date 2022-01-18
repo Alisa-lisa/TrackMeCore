@@ -5,6 +5,27 @@ import scipy.stats as stats
 import numpy as np
 
 
+def tetrachoric_correlation(first_fator: List[TA], second_factor: List[TA]) -> Optional[float]:
+    """
+    Pearson-like correlation of two binary variables. 
+    https://www.statisticshowto.com/tetrachoric-correlation/
+    Binary variable - variable taking one of 2 values
+    formula: coef = cos(pi/(1 + sqrt(bc/ad))) based on confusion matrix x:
+               f2
+            0     1
+    f1  0   a     b
+        1   c     d
+    """
+    a, b, c, d = 0, 0, 0, 0
+    d1 = [i.created_at.date() for i in first_fator]
+    d2 = [i.created_at.date() for i in second_factor]
+    main_factor_dates = list(set(d1+d2))
+    factor_one = []
+    factor_two = []
+    for d in main_factor_dates:
+        if 
+
+
 def _avg_estimation(date, array: List[TA]) -> Optional[int]:
     estimations = [
         item.estimation for item in array if (item.created_at.date() == date and item.estimation is not None)
