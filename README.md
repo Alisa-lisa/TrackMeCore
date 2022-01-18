@@ -20,8 +20,9 @@ GRANT ALL PRIVELEGES ON DATABASE trackme TO root;
 1. you will need python 3.9+ and [poetry](https://python-poetry.org/docs/#installation) installed
 2. rename `.env.example` to `.env` and adjust the variables to your system configuration
 3. to setup dependencies for local run or development: `make local-setup`
-4. run `make db-up` to prepare db
-4. to run locally: `make local-run` and go to `localhost:5000/docs` to see OpenAPI docs 
+4. default tracking configuration is shown in `tracking_configuration.json` file. Adjust the files structure to seed desired information. If the file is not present, default topics and attributes described in Wiki will be used
+5. run `make db-up` to prepare db
+6. to run locally: `make local-run` and go to `localhost:5000/docs` to see OpenAPI docs 
 
 
 ### Docker setup
@@ -40,6 +41,7 @@ GRANT ALL PRIVELEGES ON DATABASE trackme TO root;
 make sure you have openapi-generator installed. Preferred way of installation is a package with OS specific package manager.
 
 ## Tests
+!!tests are run on default data seeding!!
 run: `make test`
 
 ## Motivation behind the project
