@@ -5,7 +5,7 @@ import json
 
 # Default settings for personal tracking
 TOPICS = ["MENTAL", "PHYSICAL", "SOCIAL", "CONSUMABLE"]
-ATTRITUES = {
+ATTRIBUTES = {
     "MENTAL": ["mood", "stress", "motivation"],
     "SOCIAL": ["family", "friends", "work"],
     "PHYSICAL": ["sport", "sleep", "meditation"],
@@ -24,12 +24,12 @@ def set_topics(connection) -> None:
     insert into topics(name) values ('{}');
     """
     topics = TOPICS
-    file = os.getcwd() + "/tracking_configuration.json"
+    file = os.getcwd() + "/config/tracking_configuration.json"
     if os.path.exists(file):
-        with open('tracking_configuration.json', 'r') as conf:
+        with open(file, 'r') as conf:
                 config = json.load(conf)
-                if "topics" in config.keys():
-                    topics = config["topics"]
+                if bool(config):
+                    topics = sorted(list(config.keys()))
                 else:
                     topics = TOPICS
     for value in topics:
@@ -49,17 +49,17 @@ def set_default_attributes(connection) -> None:
     """
     idx = 1
     topics = TOPICS
-    attributes = ATTRITUES
-    file = os.getcwd() + "/tracking_configuration.json"
+    attributes = ATTRIBUTES 
+    file = os.getcwd() + "/config/tracking_configuration.json"
     if os.path.exists(file):
-        with open('tracking_configuration.json', 'r') as conf:
+        with open(file, 'r') as conf:
             config = json.load(conf)
-            if "topics" in config.keys() and "attributes" in config.keys():
-                topics = config["topics"]
-                attributes = config["attributes"]
+            if bool(config):
+                topics = sorted(list(config.keys()))
+                attributes = config
             else:
                 topics = TOPICS
-                attributes = ATTRITUES
+                attributes = ATTRIBUTES
     for index, topic in enumerate(topics, start=1):
         for attribute in attributes[topic]:
             connection.execute(raw_query.format(attribute, index))

@@ -7,41 +7,45 @@ and identify some useful patterns, correlations and trends to better adjust habi
 
 ## Local setup
 
-### DB
-1. make sure you have postgres instance running
-2. to prepare db access run:
+### Local DATABASE 
+1. if you have PostgresDB running on your host machine, make sure you have `trackme` database created and given privileges to `root`:
 ```
 CREATE DATABASE trackme;
 CREATE USER root;
 GRANT ALL PRIVELEGES ON DATABASE trackme TO root;
 ```
+2. Adjust .env file (rename `.env.example` to `.env` or create it), use `.env.example` as a reference for needed values 
+3. Create a configuration file for topics and attributes to track in the app. You can use `configuration_example.json` as a reference or read wiki for default setup (no configuration file supplied)
 
-### Local dev
+#### Docker start
+1. (MacOS and Linux) run `make build`
+2. in case you want to supply your own structure, run `make docker-migrate-own-config PATH=absolute_path_to_the_host_file`
+3. in case you want to run default structure, run `make docker-migrate.default`
+4. to start the backend app run `make run` and navigate to `localhost:5000/docs`
+
+#### Local start
 1. you will need python 3.9+ and [poetry](https://python-poetry.org/docs/#installation) installed
-2. rename `.env.example` to `.env` and adjust the variables to your system configuration
-3. to setup dependencies for local run or development: `make local-setup`
-4. default tracking configuration is shown in `tracking_configuration.json` file. Adjust the files structure to seed desired information. If the file is not present, default topics and attributes described in Wiki will be used
-5. run `make db-up` to prepare db
-6. to run locally: `make local-run` and go to `localhost:5000/docs` to see OpenAPI docs 
+2. to setup dependencies for local run or development: `make local-setup`
+3. to start the backend app run `make local-run` and navigate to `localhost:5000/docs`
 
 
-### Docker setup
-1. run `make build`
-2. to prepare db: `docker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head`
-3. and to run the app: `make run`
+## Container setup
+TBD
+
 
 ## Development
+within active poetry environment (after running `make local-setup` run `poetry shell` to activate python environment)
 1. run linters: `make linter`
-2. enable pre-commit hook: `pre-commit init` - now on `git commit` all linters will check the code
 3. to generate openapi client for this server:
 ```
 - save newest opeanpi.json to openapiclient folder
 - run: make generate-client laguage=<deisred_language>
 ```
-make sure you have openapi-generator installed. Preferred way of installation is a package with OS specific package manager.
+make sure you have [openapi-generator](https://github.com/OpenAPITools/openapi-generator) installed. Preferred way of installation is a package with OS specific package manager.
+
 
 ## Tests
-!!tests are run on default data seeding!!
+!! tests are run on default data seeding !!
 run: `make test`
 
 ## Motivation behind the project
@@ -51,59 +55,7 @@ Several information classes are predefined for an easier and more granular analy
 an information bias, where people have to choose slightly wrong form for their thoughts. 
 I believe, that with categories held as abstract as possible and a possibility to customize this information, the bias will be insufficient.
 
-### Main topics and default attributes
-
-#### MENTAL
-Feelings, emotions, mood, etc.. Anything that can mainly be subjectively assessed by a person.
-
-Default attributes:
-* mood
-* pain (psychosomatic or objectively non-identifyable)
-* anxiety
-* joy
-* happiness
-* calmness
-* excitement
-* fear
-* motivation (this is a hard one, but would be nice to collect some initial data on a complex composite feature in a form of a self-provided proxy)
-
-#### SOCIAL
-All interactions with at least 2 "live" entities including yourself (family, pets, strangers, forums, etc.)
-
-Default attributes:
-* family
-* pet
-* friends
-* online communication
-* social events
-* sport  (does not matter if you are an active participant)
-
-
-#### PHYSICAL
-Time consuming activities from simple to complex: routines, chores, common time spending and some healthy "suggestions"
-
-Default attributes:
-* sport
-* sleep
-* hygine procedures
-* pain (physically evident)
-* meditation
-* walk
-* chores
-
-#### CONSUMMABLE
-Everything a person can devour.
-
-Default attributes:
-* food
-* alcohol
-* soft drinks
-* water (non-sweetened water is linked to multiple health benefits in contrast to other beverages)
-* coffee (same reason as water to keep it separately)
-* nicotine 
-* meds (general term, ideally requires a comment for dosage/unit specification)
-
-
+More documentation about ideas and default structure can be found here: [wiki](https://github.com/Alisa-lisa/TrackMeCore/wiki)
 
 
 

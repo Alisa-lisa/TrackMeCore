@@ -12,7 +12,7 @@ RUN poetry install --no-dev --no-root --no-ansi
 
 COPY README.md /app/
 COPY app.py /app/
-COPY tracking_configuration.json /app/tracking_configuration.json
+RUN mkdir /app/config/
 COPY alembic.ini /app/
 COPY trackme/ /app/trackme/ 
 COPY run.sh /app/

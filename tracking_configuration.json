@@ -1,9 +1,0 @@
-{
-	"topics": ["MENTAL", "PHYSICAL", "SOCIAL", "CONSUMABLE"],
-	"attributes": {
-		"MENTAL": ["mood", "stress", "motivation"],
-		"SOCIAL": ["family", "friends", "work"],
-		"PHYSICAL": ["sport", "sleep", "meditation"],
-		"CONSUMABLE": ["alcohol", "water", "coffee", "smoking", "meds"]
-	}
-}

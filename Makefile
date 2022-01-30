@@ -38,7 +38,7 @@ build:
 
 .PHONY: run
 run: 
-	docker run --rm -p 5000:5000 --env-file .env --network="host" --name trackme-back trackme
+	docker run --rm -p 5000:5000 --env-file .env  --network="host" --name trackme-back trackme
 
 
 .PHONY: docker-execute
@@ -46,10 +46,13 @@ docker-execute:
 	make build
 	make run
 
-.PHONY: docker-migrate
-docker-migrate:
-	docker run --rm --env-file .env --network="host" --name tb trackme alembic upgrade head
+.PHONY: docker-migrate-own-config
+docker-migrate-own-config:
+	docker run --rm --env-file .env --volume $(PATH):/app/config/tracking_configuration.json --network="host" --name tb trackme alembic upgrade head
 
+.PHONY: docker-migrate-default
+docker-migrate-default:
+	docker run --rm --env-file .env  --network="host" --name tb trackme alembic upgrade head
 
 generate-client:
 	cd openapiclient && openapi-generator-cli generate -i openapi.json -g $(language) --ignore-file-override .
