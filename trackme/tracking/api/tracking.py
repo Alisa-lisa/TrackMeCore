@@ -1,6 +1,7 @@
 """ All about data collections, editing, deletion, download and upload """
 from typing import List, Optional
 from fastapi import APIRouter, Header, HTTPException
+from fastapi.responses import FileResponse
 from trackme.tracking.types.tracking import (
     TrackingActivityInput,
     UpdateTrackingActivity,
@@ -13,6 +14,7 @@ from trackme.tracking.crud import (
     edit_entry,
     validate_tracking_ids,
     filter_entries,
+    prepara_data_for_download,
 )
 import logging
 from fastapi.logger import logger
@@ -53,12 +55,16 @@ async def collect_filtered_entries(
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
-@router.get("/download", response_model=bool)
+@router.get("/download")
 async def download_data(token: str = Header(...), access_token: str = Header(...)):
     """
     Collect user data in one file
     """
-    return False
+    if access_token is not None and access_token == conf.ACCESS_TOKEN:
+        user_id = await check_user(token)
+        filename, filepath = await prepara_data_for_download(user_id)
+        return FileResponse(filepath, media_type="application/octet-stream", filename=filename)
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 
 # WRITE

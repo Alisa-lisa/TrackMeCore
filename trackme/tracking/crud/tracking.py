@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Optional, List
-
+from typing import Optional, List, Tuple
+import csv
 from sqlalchemy import desc, func, distinct
 from sqlalchemy.sql import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -109,11 +109,11 @@ async def delete_entry(entry_ids: List[int], user_id: int) -> bool:
 
 async def filter_entries(
     user_id: int,
-    topics: Optional[int],
-    start: Optional[str],
-    end: Optional[str],
-    attribute: Optional[int],
-    comments: Optional[bool],
+    topics: Optional[int] = None,
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    attribute: Optional[int] = None,
+    comments: Optional[bool] = None,
     ts: bool = False,
 ) -> List[TrackingActivity]:
     async with async_session() as db:
@@ -190,3 +190,30 @@ async def collect_attributes_ids(user_id: int, binary: bool = False) -> List[int
         except Exception as ex:
             logger.error(f"Could not collect non-binary attributes for user {user_id} due to {ex}")
             return []
+
+
+async def prepara_data_for_download(user_id: int) -> Tuple[str, str]:
+    """create file and write collected data to it"""
+    now = datetime.today().date()
+    file_name = f"{user_id}_{now}_tracking.csv"
+    file_path = f"./files/{file_name}"
+    with open(file_path, "w", newline="") as file:
+        writer = csv.writer(file, delimiter=",")
+        writer.writerow(["id", "created", "edited", "comment", "estimation", "topic", "attribute", "balance"])
+        entries = await filter_entries(user_id=user_id)
+        for entry in entries:
+            comment = None if entry.comment is None else entry.comment.replace(",", ";")
+            writer.writerow(
+                [
+                    entry.id,
+                    entry.created_at,
+                    entry.edit_at,
+                    comment,
+                    entry.estimation,
+                    entry.deleted_at,
+                    entry.topic_id,
+                    entry.attribute,
+                    entry.balance_tag,
+                ]
+            )
+    return file_name, file_path

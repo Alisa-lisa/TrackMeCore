@@ -62,7 +62,7 @@ def pointbiserial_correlation(first_factor: List[TA], second_factor: List[TA]) -
     factor_two_dates = list(set([item.created_at.date() for item in second_factor]))
     factor_two = [1 if d in factor_two_dates else 0 for d in first_series_dates]
     # TODO: start thinking about parsing comments to distinguish between consumables?
-    # do not compute correlation for everyday thing for now -> 
+    # do not compute correlation for everyday thing for now ->
     # need different approach (example meds dosage, or different meds)
     if 1 not in factor_two:
         return None
