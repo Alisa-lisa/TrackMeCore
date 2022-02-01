@@ -29,6 +29,7 @@ jobs:
                           run: |
                                   touch .env
                                   echo "DB_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/trackme" > .env
+                                  mkdir files
                         - name: Setting up environment
                           uses: actions/setup-python@v2.3.1
                           with:
