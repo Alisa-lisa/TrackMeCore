@@ -132,3 +132,7 @@ dmypy.json
 
 # openapi client generation
 openapiclient/*
+
+
+# custom structures
+files/*
