@@ -1,6 +1,7 @@
 import uuid
 from ..conftest import clean_up, user_setup
 from trackme.tracking.types.tracking import MentalBalanceTagEnum as mne
+import os
 
 
 USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"}
@@ -69,6 +70,21 @@ def test_filter_and_update_tracking_entry(client):
         json={"id": entry["id"], "comment": "lol"},
     )
     assert update.json()
+
+
+def test_not_allowed_dowload(client):
+    download_response = client.get("/track/download", headers={"token": str(uuid.uuid4()), "access-token": "test"})
+
+    assert download_response.status_code == 404
+    
+
+def test_proper_download(client):
+    token = user_setup(client, USER_PAYLOAD, True)
+    download_response = client.get("/track/download", headers={"token": token, "access-token": "test"})
+
+    assert download_response.status_code == 200
+    for filename in os.listdir("./files"):
+        os.remove(f"./files/{filename}")
 
 
 def test_delete_entry(client):
