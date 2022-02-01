@@ -196,7 +196,7 @@ async def prepara_data_for_download(user_id: int) -> Tuple[str, str]:
     """create file and write collected data to it"""
     now = datetime.today().date()
     file_name = f"{user_id}_{now}_tracking.csv"
-    file_path = f"./files/{file_name}"
+    file_path = f"/files/{file_name}"
     with open(file_path, "w", newline="") as file:
         writer = csv.writer(file, delimiter=",")
         writer.writerow(["id", "created", "edited", "comment", "estimation", "topic", "attribute", "balance"])
