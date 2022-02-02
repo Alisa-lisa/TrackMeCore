@@ -76,7 +76,7 @@ def test_not_allowed_dowload(client):
     download_response = client.get("/track/download", headers={"token": str(uuid.uuid4()), "access-token": "test"})
 
     assert download_response.status_code == 404
-    
+
 
 def test_proper_download(client):
     token = user_setup(client, USER_PAYLOAD, True)
