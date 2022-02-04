@@ -120,8 +120,9 @@ async def filter_entries(
 ) -> List[TrackingActivity]:
     async with async_session() as db:
         # get mapping for the user to avoid unfinished routines
-        mapping = await _get_attributes_mapping(user_id)
+        result = []
         try:
+            mapping = await _get_attributes_mapping(user_id)
             entries_query = select(EntryModel).filter(EntryModel.user_id == user_id)
             if topics is not None:
                 entries_query = entries_query.filter(EntryModel.topic_id == topics)
@@ -138,26 +139,26 @@ async def filter_entries(
                 entries_query = entries_query.filter(EntryModel.attribute_id == attribute)
             if ts:
                 entries_query = entries_query.order_by(EntryModel.created_at.asc())
-            # entries_query = entries_query.order_by(desc(EntryModel.created_at))
-            entries_query = entries_query.order_by(desc(EntryModel.id))
+            entries_query = entries_query.order_by(desc(EntryModel.created_at))
             entries = (await db.execute(entries_query)).scalars().all()
-            result = []
             for entry in entries:
-                result.append(TrackingActivity(
-                    id=entry.id,
-                    created_at=entry.created_at,
-                    edit_at=entry.edit_at,
-                    comment=entry.comment,
-                    estimation=entry.estimation,
-                    topic_id=entry.topic_id,
-                    user_id=entry.user_id,
-                    attribute=None if entry.attribute_id is None else mapping[entry.attribute_id],
-                    balance_tag=entry.balance_tag,
-                ))
-            return result 
+                result.append(
+                    TrackingActivity(
+                        id=entry.id,
+                        created_at=entry.created_at,
+                        edit_at=entry.edit_at,
+                        comment=entry.comment,
+                        estimation=entry.estimation,
+                        topic_id=entry.topic_id,
+                        user_id=entry.user_id,
+                        attribute=None if entry.attribute_id is None else mapping[entry.attribute_id],
+                        balance_tag=entry.balance_tag,
+                    )
+                )
         except Exception as ex:
             logger.error(f"Could not collect entries due to {ex}")
-            return []
+        finally:
+            return result
 
 
 async def get_time_horizon(user_id: int, attribute_id: int) -> list:

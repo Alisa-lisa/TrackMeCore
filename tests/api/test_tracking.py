@@ -85,7 +85,7 @@ def test_proper_download(client):
 
     assert download_response.status_code == 200
     for filename in os.listdir(f"{os.getcwd()}/files"):
-        with open(f"{os.getcwd()}/files/{filename}", 'r') as download:
+        with open(f"{os.getcwd()}/files/{filename}", "r") as download:
             reader = csv.reader(download)
             assert len(list(reader)) > 1
         os.remove(f"./files/{filename}")

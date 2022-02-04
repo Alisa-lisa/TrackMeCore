@@ -12,10 +12,19 @@ from trackme.tracking.models import AttributeModel, TopicModel
 async def _get_attributes_mapping(user_id: int) -> dict:
     result = {}
     async with async_session() as db:
-        attributes = (await db.execute(select(AttributeModel)
-            .filter(or_(AttributeModel.user_id.is_(None), AttributeModel.user_id == user_id)))).scalars().all()
+        attributes = (
+            (
+                await db.execute(
+                    select(AttributeModel).filter(
+                        or_(AttributeModel.user_id.is_(None), AttributeModel.user_id == user_id)
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
         for item in attributes:
-            result[item.id] = item.name    
+            result[item.id] = item.name
     return result
 
 
