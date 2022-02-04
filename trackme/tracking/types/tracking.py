@@ -20,7 +20,7 @@ class TrackingActivity(BaseModel):
     deleted_at: Optional[datetime]
     topic_id: Optional[int]
     user_id: int
-    attribute: str
+    attribute: Optional[str]
     balance_tag: Optional[MentalBalanceTagEnum]
 
 

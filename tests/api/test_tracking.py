@@ -2,6 +2,7 @@ import uuid
 from ..conftest import clean_up, user_setup
 from trackme.tracking.types.tracking import MentalBalanceTagEnum as mne
 import os
+import csv
 
 
 USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"}
@@ -57,17 +58,17 @@ def test_filter_and_update_tracking_entry(client):
     assert len(entries.json()) == 3
 
     entries_body = entries.json()
-    assert entries_body[0]["balance_tag"] is not None
-    assert entries_body[0]["balance_tag"] == mne.fun
+    balance_entry = [entry for entry in entries_body if entry["comment"] == "paaaain"][0]
+    assert balance_entry["balance_tag"] is not None
+    assert balance_entry["balance_tag"] == mne.fun
 
-    entry = entries.json()[0]
-    diff_time = [e for e in entries.json() if e["comment"] == "mooood"][0]
-    assert entry["created_at"] != diff_time["created_at"]
+    mood_entry = [entry for entry in entries_body if entry["comment"] == "mooood"][0]
+    assert mood_entry["created_at"] != balance_entry["created_at"]
 
     update = client.put(
         "/track/update",
         headers={"token": token, "access-token": "test"},
-        json={"id": entry["id"], "comment": "lol"},
+        json={"id": mood_entry["id"], "comment": "lol"},
     )
     assert update.json()
 
@@ -83,7 +84,10 @@ def test_proper_download(client):
     download_response = client.get("/track/download", headers={"token": token, "access-token": "test"})
 
     assert download_response.status_code == 200
-    for filename in os.listdir("./files"):
+    for filename in os.listdir(f"{os.getcwd()}/files"):
+        with open(f"{os.getcwd()}/files/{filename}", 'r') as download:
+            reader = csv.reader(download)
+            assert len(list(reader)) > 1
         os.remove(f"./files/{filename}")
 
 

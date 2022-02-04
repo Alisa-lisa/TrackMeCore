@@ -11,6 +11,7 @@ from trackme.tracking.types.tracking import TrackingActivity, TrackingActivityIn
 
 from trackme.tracking.crud.meta_validation import (
     _collect_attribute_name_for_entry,
+    _get_attributes_mapping,
 )
 
 from trackme.storage import async_session
@@ -63,7 +64,7 @@ async def _prepare_tracking_attribute(db: AsyncSession, entry: EntryModel) -> Tr
         estimation=entry.estimation,
         topic_id=entry.topic_id,
         user_id=entry.user_id,
-        attribute=await _collect_attribute_name_for_entry(db, entry.attribute_id),
+        attribute=await _collect_attribute_name_for_entry(entry.attribute_id),
     )
 
 
@@ -118,6 +119,8 @@ async def filter_entries(
     ts: bool = False,
 ) -> List[TrackingActivity]:
     async with async_session() as db:
+        # get mapping for the user to avoid unfinished routines
+        mapping = await _get_attributes_mapping(user_id)
         try:
             entries_query = select(EntryModel).filter(EntryModel.user_id == user_id)
             if topics is not None:
@@ -135,10 +138,12 @@ async def filter_entries(
                 entries_query = entries_query.filter(EntryModel.attribute_id == attribute)
             if ts:
                 entries_query = entries_query.order_by(EntryModel.created_at.asc())
-            entries_query = entries_query.order_by(desc(EntryModel.created_at))
+            # entries_query = entries_query.order_by(desc(EntryModel.created_at))
+            entries_query = entries_query.order_by(desc(EntryModel.id))
             entries = (await db.execute(entries_query)).scalars().all()
-            entries = [
-                TrackingActivity(
+            result = []
+            for entry in entries:
+                result.append(TrackingActivity(
                     id=entry.id,
                     created_at=entry.created_at,
                     edit_at=entry.edit_at,
@@ -146,12 +151,10 @@ async def filter_entries(
                     estimation=entry.estimation,
                     topic_id=entry.topic_id,
                     user_id=entry.user_id,
-                    attribute=await _collect_attribute_name_for_entry(db, entry.attribute_id),
+                    attribute=None if entry.attribute_id is None else mapping[entry.attribute_id],
                     balance_tag=entry.balance_tag,
-                )
-                for entry in entries
-            ]
-            return entries
+                ))
+            return result 
         except Exception as ex:
             logger.error(f"Could not collect entries due to {ex}")
             return []
