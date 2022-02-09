@@ -9,7 +9,6 @@ import statsmodels.api as sm
 from statsmodels.stats.stattools import durbin_watson
 import numpy as np
 from fastapi.logger import logger
-import math
 
 
 def detect_autocorrelation(input_data: List[int]) -> Tuple[bool, Optional[List[float]]]:
@@ -161,9 +160,7 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
             raw_second = await filter_entries(
                 user_id=user_id, topics=None, start=None, end=None, attribute=factor, comments=None, ts=True
             )
-            coef = pearson_correlation(ts_raw, raw_second)
-            if not math.isnan(coef):  # type: ignore
-                res["multifactor"]["pearson"].append({factor: coef})  # type: ignore
+            res["multifactor"]["pearson"].append({factor: pearson_correlation(ts_raw, raw_second)})  # type: ignore
 
         # continuous_factor vs binary_factors correlation
         res["multifactor"]["pbsr"] = []  # type: ignore

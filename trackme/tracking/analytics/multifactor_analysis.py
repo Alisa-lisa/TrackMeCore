@@ -3,6 +3,7 @@ from typing import List, Optional
 from trackme.tracking.types.tracking import TrackingActivity as TA
 import scipy.stats as stats
 import numpy as np
+import math
 
 
 def _avg_estimation(date, array: List[TA]) -> Optional[int]:
@@ -47,7 +48,7 @@ def pearson_correlation(first_factor: List[TA], second_factor: List[TA]) -> Opti
         return None
     r, p = stats.pearsonr(factor_one, factor_two)
     # TODO: use p to check if correlation makes sense
-    return r
+    return r if r is not math.isnan(r) else None
 
 
 def pointbiserial_correlation(first_factor: List[TA], second_factor: List[TA]) -> Optional[float]:
