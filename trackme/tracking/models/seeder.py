@@ -47,7 +47,6 @@ def set_default_attributes(connection) -> None:
     raw_query = """
     insert into attributes(name, topic_id) values ('{}', {});
     """
-    idx = 1
     topics = TOPICS
     attributes = ATTRIBUTES
     file = os.getcwd() + "/config/tracking_configuration.json"
@@ -63,4 +62,3 @@ def set_default_attributes(connection) -> None:
     for index, topic in enumerate(topics, start=1):
         for attribute in attributes[topic]:
             connection.execute(raw_query.format(attribute, index))
-            idx += 1

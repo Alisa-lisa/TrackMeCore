@@ -19,6 +19,7 @@ class Attribute(BaseModel):
     topic_id: int
     user_id: Optional[int]
     icon_name: Optional[str]
+    active: bool
 
 
 class AttributeInput(BaseModel):
@@ -29,3 +30,4 @@ class AttributeInput(BaseModel):
 
 class AttributeOutput(BaseModel):
     name: str
+    active: bool

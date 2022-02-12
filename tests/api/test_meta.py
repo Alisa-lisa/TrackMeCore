@@ -36,6 +36,7 @@ def test_proper_create_attributes(client):
 
     assert track.status_code == 200
     assert track.json()["name"] == "sport"
+    assert track.json()["active"]
 
     assert len(default_attributes.json()) < len(custom_attributes.json())
 
