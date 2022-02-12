@@ -176,5 +176,4 @@ async def collect_report(user_id: int, attribute_id: int) -> dict:
     # binary_factors vs binary_factors correlation: TBI
     else:
         return res
-    print(f"this is result: {res}")
     return res

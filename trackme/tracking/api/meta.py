@@ -7,8 +7,9 @@ from trackme.tracking.crud import (
     check_user,
     add_attributes,
     delete_attributes,
+    update_attributes,
 )
-from trackme.tracking.types.meta import Topic, Attribute, AttributeInput
+from trackme.tracking.types.meta import AttributeUpdateInput, Topic, Attribute, AttributeInput
 from trackme import conf
 
 
@@ -59,6 +60,27 @@ async def create_custom_attribute(attribute: AttributeInput, access_token: str =
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         user = await check_user(token)
         return await add_attributes(attribute, user)
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
+
+
+@router.put("/attributes", response_model=bool)
+async def update_attribute(attribute: AttributeUpdateInput, access_token: str = Header(...), token: str = Header(...)):
+    """
+    # Update an attribute
+    ---
+    ## Parameters:
+    * attribute_id - unique attribute identifier
+    * (optional) active - boolean value if the attribute should be visible or not
+
+    ## Returns:
+    True if update is successful, False otherwise
+    """
+    if access_token is not None and access_token == conf.ACCESS_TOKEN:
+        user = await check_user(token)
+        if user is not None:
+            return await update_attributes(attribute)
+        else:
+            raise HTTPException(status_code=404, detail="Unknown user")
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 

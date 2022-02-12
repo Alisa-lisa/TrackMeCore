@@ -17,4 +17,5 @@ from .meta import (
     get_attributes,
     add_attributes,
     delete_attributes,
+    update_attributes,
 )

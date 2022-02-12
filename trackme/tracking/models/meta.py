@@ -1,5 +1,5 @@
 """ categorical classification for the tracking data """
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship
 
 from trackme.storage import Base
@@ -25,6 +25,7 @@ class Attribute(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     deleted_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
+    active = Column(Boolean, nullable=False, default=True)  # "new" attributes are right away active
     # default icons are hardcoded for now in the frontend, but can be changed in the future
     icon_name = Column(String, nullable=True)
 
