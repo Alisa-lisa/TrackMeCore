@@ -41,6 +41,30 @@ def test_proper_create_attributes(client):
     assert len(default_attributes.json()) < len(custom_attributes.json())
 
 
+def test_hide_attribute(client):
+    # hide and then reactivate an attribute
+    token = user_setup(client, USER_PAYLOAD, True)
+    url = f'/meta/attributes?topic_id={PROPER_ATTRIBUTE["topic_id"]}'
+    attribute_to_update = client.get(url, headers={"token": token, "access-token": "test"}).json()[0]
+    assert attribute_to_update["active"]
+
+    data = {"id": attribute_to_update["id"], "active": False}
+    updated = client.put("/meta/attributes", headers={"token": token, "access-token": "test"}, json=data)
+    assert updated.status_code == 200
+    assert updated.json()
+
+    url = f'/meta/attributes?topic_id={PROPER_ATTRIBUTE["topic_id"]}'
+    non_active_attribute = [
+        a
+        for a in client.get(url, headers={"token": token, "access-token": "test"}).json()
+        if a["id"] == attribute_to_update["id"]
+    ][0]
+    assert non_active_attribute["id"] == attribute_to_update["id"]
+    assert not non_active_attribute["active"]
+
+    data = {"id": attribute_to_update["id"], "active": True}
+    updated = client.put("/meta/attributes", headers={"token": token, "access-token": "test"}, json=data)
+
 def test_proper_delete_attribute(client):
     token = user_setup(client, USER_PAYLOAD, True)
     url = f'/meta/attributes?topic_id={PROPER_ATTRIBUTE["topic_id"]}'

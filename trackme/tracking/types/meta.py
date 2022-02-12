@@ -22,6 +22,13 @@ class Attribute(BaseModel):
     active: bool
 
 
+class AttributeUpdateInput(BaseModel):
+    id: int
+    active: Optional[bool]
+    # name: Optional[str]
+    # icon_name: Optional[str]
+
+
 class AttributeInput(BaseModel):
     name: str
     topic_id: int

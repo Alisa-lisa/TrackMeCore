@@ -1,6 +1,6 @@
 from trackme.tracking.crud.meta_validation import does_topic_exist
 from typing import List, Optional
-from trackme.tracking.types.meta import Topic, Attribute, AttributeInput
+from trackme.tracking.types.meta import AttributeUpdateInput, Topic, Attribute, AttributeInput
 from trackme.tracking.models import (
     AttributeModel,
     TopicModel,
@@ -86,6 +86,25 @@ async def add_attributes(attribute: AttributeInput, user_id: int) -> Optional[At
         except Exception as ex:
             logger.error(f"Could not create attribute due to {ex}")
             return None
+
+
+async def update_attributes(attribute: AttributeUpdateInput) -> bool:
+    async with async_session() as db:
+        try:
+            attribute_to_update = (
+                (await db.execute(select(AttributeModel).filter(AttributeModel.id == attribute.id))).scalars().first()
+            )
+            logger.error(f"attribute_to_update is {attribute_to_update}")
+            if attribute_to_update is not None:
+                if attribute.active is not None:
+                    attribute_to_update.active = attribute.active
+
+                await db.commit()
+                return True
+            return False
+        except Exception as ex:
+            logger.error(f"Could not update an attribute due to {ex}")
+            return False
 
 
 async def delete_attributes(attribute_id: int) -> bool:
