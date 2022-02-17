@@ -1,9 +1,19 @@
+from datetime import datetime
 from trackme.tracking.crud.meta_validation import does_topic_exist
 from typing import List, Optional
-from trackme.tracking.types.meta import AttributeUpdateInput, Topic, Attribute, AttributeInput
+from trackme.tracking.types.meta import (
+    Topic,
+    Attribute,
+    AttributeInput,
+    AttributeUpdateInput,
+    Experiment,
+    ExperimentInput,
+    ExperimentUpdateInput,
+)
 from trackme.tracking.models import (
     AttributeModel,
     TopicModel,
+    ExperimentModel,
 )
 from sqlalchemy.sql import select
 from trackme.storage import async_session
@@ -49,7 +59,61 @@ async def get_attributes(user_id: Optional[int], topic_id: int) -> List[Attribut
             return []
 
 
+async def get_all_experiments(user_id: int) -> List[Experiment]:
+    async with async_session() as db:
+        result = []
+        try:
+            experiments = (
+                (await db.execute(select(ExperimentModel).filter(ExperimentModel.user_id == user_id))).scalars().all()
+            )
+            result = [Experiment.from_orm(exp) for exp in experiments]
+        except Exception as ex:
+            logger.error(f"Could not collect experiments for the user due to {ex}")
+        finally:
+            return result
+
+
 # WRITE
+async def add_experiment(experiment: ExperimentInput, user_id: int) -> Optional[Experiment]:
+    """Add experiment to start scoped tracking"""
+    async with async_session() as db:
+        try:
+            # experiment is only allowed once the previous is closed - first iteration
+            old_experiment_query = (
+                select(ExperimentModel)
+                .filter(ExperimentModel.user_id == user_id)
+                .filter(ExperimentModel.closed_at.is_(None))
+            )
+            old_experiment = (await db.execute(old_experiment_query)).scalars().first()
+            if old_experiment is not None:
+                logger.error("Close previous experiment first!")
+                return None
+            new_experiment = ExperimentModel(user_id=user_id, name=experiment.name)
+            db.add(new_experiment)
+            await db.commit()
+            new_experiment = (await db.execute(old_experiment_query)).scalars().first()
+            return Experiment.from_orm(new_experiment)
+        except Exception as ex:
+            logger.error(f"Could not create an experiment due to {ex}")
+            return None
+
+
+# later on update
+async def close_experiments(experiment: ExperimentUpdateInput, user_id: int) -> bool:
+    async with async_session() as db:
+        try:
+            experiment_to_close = (
+                (await db.execute(select(ExperimentModel).filter(ExperimentModel.id == experiment.id))).scalars().one()
+            )
+            assert experiment_to_close.user_id == user_id
+            experiment_to_close.closed_at = datetime.today()
+            await db.commit()
+            return True
+        except Exception as ex:
+            logger.error(f"Could not close experiment {experiment.id} due to {ex}")
+            return False
+
+
 async def add_attributes(attribute: AttributeInput, user_id: int) -> Optional[Attribute]:
     """Try to add a new attribute for specific topic and user
     :params attribute: AttributeInput basic information for the new Attribute object

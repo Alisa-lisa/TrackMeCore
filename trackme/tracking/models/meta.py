@@ -1,7 +1,7 @@
 """ categorical classification for the tracking data """
+from datetime import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship
-
 from trackme.storage import Base
 
 
@@ -30,3 +30,14 @@ class Attribute(Base):
     icon_name = Column(String, nullable=True)
 
     __table_args__ = (UniqueConstraint("user_id", "topic_id", "name", name="unique_attribute"),)
+
+
+# experiments - are scoped tracking to answer specific questions
+class Experiment(Base):
+    __tablename__ = "experiments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    closed_at = Column(DateTime, nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

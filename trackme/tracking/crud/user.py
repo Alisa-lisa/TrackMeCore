@@ -39,19 +39,13 @@ async def create_user(user: UserInput) -> Tuple[bool, str]:
             return False, f"Error: {ex}"
 
 
-async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -> Tuple[Optional[str], str]:
+async def auth_user(user: UserInput) -> Tuple[Optional[str], str]:
     """create new access token or return existing one for existing user"""
     async with async_session() as db:
         verify_user = await _get_user(db, user)
         if verify_user is not None:
             existing_token = (
-                (
-                    await db.execute(
-                        select(UserActivityModel)
-                        .filter(UserActivityModel.user_id == verify_user.user_id)
-                        .filter(UserActivityModel.client == client)
-                    )
-                )
+                (await db.execute(select(UserActivityModel).filter(UserActivityModel.user_id == verify_user.user_id)))
                 .scalars()
                 .first()
             )
@@ -62,8 +56,6 @@ async def auth_user(user: UserInput, client: Optional[str], ip: Optional[str]) -
                     user_id=verify_user.user_id,
                     token=uuid.uuid4(),
                     activation=datetime.now(),
-                    ip=ip,
-                    client=client,
                 )
                 db.add(token)
                 await db.commit()

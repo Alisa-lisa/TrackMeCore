@@ -25,8 +25,6 @@ class UserActivity(BaseModel):
     user_id: int
     token: uuid.UUID
     activation: datetime
-    ip: Optional[str]
-    client: Optional[str]
 
     class Config:
         orm_mode = True

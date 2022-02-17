@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
@@ -38,3 +39,24 @@ class AttributeInput(BaseModel):
 class AttributeOutput(BaseModel):
     name: str
     active: bool
+
+
+class Experiment(BaseModel):
+    class Config:
+        orm_mode = True
+
+    id: int
+    name: Optional[str]
+    created_at: datetime
+    closed_at: Optional[datetime]
+    user_id: int
+
+
+class ExperimentInput(BaseModel):
+    name: str
+
+
+class ExperimentUpdateInput(BaseModel):
+    id: int
+    name: Optional[str]
+    closed_at: Optional[datetime]

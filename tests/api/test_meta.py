@@ -1,3 +1,4 @@
+from datetime import datetime
 from ..conftest import clean_up, user_setup
 
 USER_PAYLOAD = {"name": "test1", "password": "123456", "email": "test@email.com"}
@@ -65,6 +66,7 @@ def test_hide_attribute(client):
     data = {"id": attribute_to_update["id"], "active": True}
     updated = client.put("/meta/attributes", headers={"token": token, "access-token": "test"}, json=data)
 
+
 def test_proper_delete_attribute(client):
     token = user_setup(client, USER_PAYLOAD, True)
     url = f'/meta/attributes?topic_id={PROPER_ATTRIBUTE["topic_id"]}'
@@ -78,5 +80,50 @@ def test_proper_delete_attribute(client):
     )
 
     assert deleted_attribue
+
+
+def test_proper_create_experiment(client):
+    token = user_setup(client, USER_PAYLOAD, True)
+    experiment = client.post(
+        "/meta/experiments", headers={"token": token, "access-token": "test"}, json={"name": "first experiment"}
+    )
+
+    assert experiment.status_code == 200
+    assert experiment.json()["name"] == "first experiment"
+    assert experiment.json()["closed_at"] is None
+
+
+def test_no_experiment_can_be_cerated_wehn_previous_is_open(client):
+    token = user_setup(client, USER_PAYLOAD, True)
+    experiment = client.post(
+        "/meta/experiments", headers={"token": token, "access-token": "test"}, json={"name": "first experiment"}
+    )
+
+    # assert experiment.status_code == ?  # TBD: better error and status codes handling
+    assert experiment.json() is None
+
+
+def test_close_old_experiment_and_create_new(client):
+    token = user_setup(client, USER_PAYLOAD, True)
+    all_experiments = client.get("/meta/experiments", headers={"token": token, "access-token": "test"})
+    old_open_experiment = [exp for exp in all_experiments.json() if exp["closed_at"] is None][0]
+
+    assert old_open_experiment["name"] == "first experiment"
+    json = {"id": old_open_experiment["id"], "closed_at": datetime.today().isoformat()}
+    close = client.put("/meta/experiments", headers={"token": token, "access-token": "test"}, json=json)
+
+    assert close.status_code == 200
+    assert close.json()
+
+    experiment = client.post(
+        "/meta/experiments", headers={"token": token, "access-token": "test"}, json={"name": "second experiment"}
+    )
+    assert experiment.status_code == 200
+    assert experiment.json()["name"] == "second experiment"
+    assert experiment.json()["closed_at"] is None
+
+    all_experiments = client.get("/meta/experiments", headers={"token": token, "access-token": "test"})
+
+    assert len(all_experiments.json()) > 1
 
     clean_up(client, USER_PAYLOAD, token)
