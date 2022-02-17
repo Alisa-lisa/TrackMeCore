@@ -34,7 +34,7 @@ async def register_user(input_user: UserInput, access_token: str = Header(...)):
 async def login_user(input_user: UserInput, access_token: str = Header(...)):
     """either refresh an access token or fetch already existing one"""
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
-        token, message = await auth_user(input_user, None, None)
+        token, message = await auth_user(input_user)
         if token is None:
             raise HTTPException(403, message)
         return token

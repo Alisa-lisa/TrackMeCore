@@ -8,8 +8,19 @@ from trackme.tracking.crud import (
     add_attributes,
     delete_attributes,
     update_attributes,
+    add_experiment,
+    close_experiments,
+    get_all_experiments,
 )
-from trackme.tracking.types.meta import AttributeUpdateInput, Topic, Attribute, AttributeInput
+from trackme.tracking.types.meta import (
+    AttributeUpdateInput,
+    Experiment,
+    ExperimentInput,
+    ExperimentUpdateInput,
+    Topic,
+    Attribute,
+    AttributeInput,
+)
 from trackme import conf
 
 
@@ -60,6 +71,56 @@ async def create_custom_attribute(attribute: AttributeInput, access_token: str =
     if access_token is not None and access_token == conf.ACCESS_TOKEN:
         user = await check_user(token)
         return await add_attributes(attribute, user)
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
+
+
+@router.get("/experiments", response_model=List[Experiment])
+async def get_experiments(access_token: str = Header(...), token: str = Header(...)):
+    """
+    Collect all users experiments
+    ---
+    ## Parameters:
+    * user identity
+    ## Returns:
+    A list of all experiments associated with the user
+    """
+    if access_token is not None and access_token == conf.ACCESS_TOKEN:
+        user = await check_user(token)
+        return await get_all_experiments(user)
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
+
+
+@router.post("/experiments", response_model=Optional[Experiment])  # type: ignore
+async def create_experiment(experiment: ExperimentInput, access_token: str = Header(...), token: str = Header(...)):
+    """
+    Create experiments: scoped tracking for specific purpose and time
+    ---
+    ## Parameters:
+    * experiment: json with the name of experiment
+    ## Returns:
+    If experiment creation is successful then Experiment object, otherwise None
+    """
+    if access_token is not None and access_token == conf.ACCESS_TOKEN:
+        user = await check_user(token)
+        return await add_experiment(experiment, user)
+    raise HTTPException(status_code=401, detail="You are not authorized to access this API")
+
+
+@router.put("/experiments", response_model=bool)
+async def close_experiment(
+    experiment: ExperimentUpdateInput, access_token: str = Header(...), token: str = Header(...)
+):
+    """
+    Close experiment name or close it
+    ---
+    ## Parameters:
+    * experiment: all present fields from json will be updated
+    ## Returns:
+    If close was successful return True, False otherwise
+    """
+    if access_token is not None and access_token == conf.ACCESS_TOKEN:
+        user = await check_user(token)
+        return await close_experiments(experiment, user)
     raise HTTPException(status_code=401, detail="You are not authorized to access this API")
 
 

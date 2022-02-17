@@ -19,6 +19,7 @@ class User(Base):
     activity = relationship("UserActivity", backref="users", cascade="all, delete-orphan")
     tracking = relationship("TrackingActivity", backref="users", cascade="all, delete-orphan")
     attributes = relationship("Attribute", backref="users", cascade="all, delete-orphan")
+    experiments = relationship("Experiment", backref="experiments", cascade="all, delete-orphan")
 
 
 class UserActivity(Base):
@@ -28,5 +29,3 @@ class UserActivity(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     token = Column(UUID(as_uuid=True), unique=True, nullable=False)
     activation = Column(DateTime, nullable=False)
-    ip = Column(String, nullable=True)
-    client = Column(String, nullable=True)
